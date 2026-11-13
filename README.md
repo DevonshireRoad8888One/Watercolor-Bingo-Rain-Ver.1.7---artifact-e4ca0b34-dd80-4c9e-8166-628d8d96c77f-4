@@ -1,3 +1,7 @@
+
+<img width="1920" height="1080" alt="Screenshot (556) (1)" src="https://github.com/user-attachments/assets/542f57a2-fd10-4157-a765-00b8d4b0baf1" />
+
+
 <div align="center">
 
 # 🎨⚽ → 💧 Watercolor Bingo Rain
