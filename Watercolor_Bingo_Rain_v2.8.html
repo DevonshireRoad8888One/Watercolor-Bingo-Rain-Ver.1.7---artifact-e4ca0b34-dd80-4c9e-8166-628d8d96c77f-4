@@ -1,0 +1,1852 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="build" content="2.8" />
+<title>Watercolor Bingo Rain v2.8</title>
+<style>
+  :root{ --glass:rgba(10,16,30,.55); --line:rgba(255,255,255,.13); --txt:#e7f0ff; }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#070d1a;
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial;color:var(--txt);}
+  canvas{display:block;position:fixed;inset:0;touch-action:none}
+  .panel{transition:opacity .3s ease,transform .3s ease}
+  body.hideui .panel{opacity:0;pointer-events:none;transform:translateY(10px)}
+  .hud{position:fixed;z-index:20;left:18px;top:16px;max-width:340px;pointer-events:none}
+  .hud h1{font-size:18px;margin:0 0 5px;letter-spacing:.2px;font-weight:650}
+  .hud h1 span{opacity:.85;font-weight:400}
+  .hud p{margin:0;font-size:12px;line-height:1.5;opacity:.55}
+  .badge{display:inline-block;margin-top:8px;padding:3px 9px;border-radius:999px;font-size:11px;
+    background:rgba(255,190,60,.18);border:1px solid rgba(255,190,60,.45);color:#ffd88a}
+  .badge.ok{background:rgba(90,220,140,.16);border-color:rgba(90,220,140,.45);color:#8ff0b4}
+  .ver{display:inline-block;margin-left:6px;padding:3px 9px;border-radius:999px;font-size:11px;
+    background:rgba(110,200,255,.16);border:1px solid rgba(110,200,255,.45);color:#a9e0ff;
+    font-variant-numeric:tabular-nums;letter-spacing:.02em}
+  .meter{width:196px;height:6px;border-radius:999px;background:rgba(255,255,255,.12);
+    overflow:hidden;margin-top:9px;border:1px solid var(--line)}
+  .meter>div{height:100%;width:0%;background:linear-gradient(90deg,#4fd0ff,#7ef0c0,#ffd76f,#ff7aa2);
+    transition:width .05s linear}
+  .audiostate{margin-top:6px;font-size:11px;opacity:.6;letter-spacing:.02em}
+  .srcstate{margin-top:3px;font-size:11px;opacity:.5;font-variant-numeric:tabular-nums}
+  .srcstate.warn{color:#ffc9a3;opacity:.9}
+  .panel{position:fixed;z-index:20;right:16px;bottom:16px;width:264px;
+    max-height:calc(100vh - 32px);overflow-y:auto;background:var(--glass);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--line);
+    border-radius:14px;padding:13px 14px;font-size:12px;box-shadow:0 12px 40px rgba(0,0,0,.45)}
+  .panel::-webkit-scrollbar{width:7px}
+  .panel::-webkit-scrollbar-thumb{background:rgba(255,255,255,.16);border-radius:4px}
+  .panelhead{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px;
+    padding-bottom:9px;border-bottom:1px solid var(--line)}
+  .panelhead span:first-child{font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.55;font-weight:700}
+  .panelhead .ver{margin:0}
+  .panel h2{font-size:10px;letter-spacing:.16em;text-transform:uppercase;opacity:.42;margin:14px 0 8px;font-weight:700}
+  .panel h2:first-of-type{margin-top:0}
+  .row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+  button{flex:1 1 auto;min-width:60px;padding:7px 8px;border-radius:9px;cursor:pointer;
+    background:rgba(255,255,255,.09);border:1px solid var(--line);color:var(--txt);
+    font:inherit;font-size:12px;transition:background .15s,transform .08s}
+  button:hover{background:rgba(255,255,255,.17)}
+  button:active{transform:translateY(1px)}
+  button.on{background:rgba(110,200,255,.28);border-color:rgba(140,215,255,.5)}
+  button.primary{background:rgba(60,170,220,.30);border-color:rgba(120,215,255,.55);font-weight:600}
+  button.primary:hover{background:rgba(80,200,255,.42)}
+  .lbl{display:flex;justify-content:space-between;opacity:.72;margin:8px 0 3px}
+  .lbl b{font-weight:500;font-variant-numeric:tabular-nums;color:#9fdcff}
+  input[type=range]{width:100%;accent-color:#6fd3ff;height:15px}
+  .chk{display:flex;align-items:center;gap:7px;margin:5px 0;opacity:.78;cursor:pointer}
+  .chk input{accent-color:#6fd3ff}
+  .statusline{font-size:11px;opacity:.62;margin:2px 0 6px;padding:5px 8px;border-radius:7px;
+    background:rgba(255,255,255,.06);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+  .statusline.ok{color:#8ff0b4;border-color:rgba(90,220,140,.35)}
+  .statusline.warn{color:#ffc9a3;border-color:rgba(255,180,110,.35)}
+  .diag{font-size:10.5px;opacity:.55;margin:4px 0 8px;padding:6px 8px;border-radius:7px;
+    background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.08);
+    font-family:ui-monospace,Consolas,monospace;line-height:1.55;word-break:break-word;white-space:pre-wrap}
+  .note{font-size:10.5px;line-height:1.5;opacity:.42;margin:8px 0 0}
+  .note b{opacity:.85}
+  .tip{font-size:10.5px;line-height:1.5;margin:0 0 8px;padding:7px 9px;border-radius:8px;
+    background:rgba(255,170,80,.10);border:1px solid rgba(255,180,110,.32);color:#ffd9b8}
+  .tip b{opacity:1}
+  .alert{font-size:10.5px;line-height:1.5;margin:0 0 10px;padding:8px 10px;border-radius:8px;
+    background:rgba(200,60,60,.16);border:1px solid rgba(255,120,120,.42);color:#ffd0d0}
+  .alert b{opacity:1;color:#fff}
+  .alert.none{display:none}
+  .stats{margin:0 0 10px;padding:8px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+    opacity:.75;display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+  .hint{position:fixed;z-index:20;left:18px;bottom:16px;font-size:11px;opacity:.42;pointer-events:none;line-height:1.7}
+  .hint b{color:#9fdcff;font-weight:600}
+  .showbtn{position:fixed;z-index:21;right:16px;bottom:16px;padding:7px 12px;border-radius:10px;
+    background:var(--glass);border:1px solid var(--line);color:var(--txt);font-size:11px;
+    opacity:0;pointer-events:none;transition:opacity .3s;backdrop-filter:blur(10px);cursor:pointer}
+  body.hideui .showbtn{opacity:.55;pointer-events:auto}
+  .showbtn:hover{opacity:1}
+  #bRestore{position:fixed;z-index:30;left:50%;top:24px;transform:translateX(-50%) translateY(-20px);
+    padding:11px 20px;border-radius:999px;cursor:pointer;background:rgba(40,110,150,.92);
+    border:1px solid rgba(140,215,255,.6);color:#eaf7ff;font:inherit;font-size:13px;opacity:0;
+    pointer-events:none;transition:opacity .25s,transform .25s;backdrop-filter:blur(10px);
+    box-shadow:0 8px 30px rgba(0,0,0,.5)}
+  body.showrestore #bRestore{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(0)}
+  #bRestore:hover{background:rgba(60,150,200,.95)}
+  #err{
+    display:none;position:fixed;z-index:99;left:16px;right:16px;top:12px;max-height:42vh;overflow:auto;
+    background:rgba(160,30,30,.94);color:#fff;border:1px solid #ff8080;border-radius:10px;
+    padding:10px 14px;font:12px/1.5 ui-monospace,Consolas,monospace;white-space:pre-wrap;cursor:copy;
+  }
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="err" title="click to copy"></div>
+<button id="bRestore">Reconnect sound</button>
+
+<div class="hud">
+  <h1>Watercolor Bingo Rain <span>v2.8</span></h1>
+  <p>Balls burst in 30s and 50s, bounce like a bingo drum, then dissolve into slow undulating
+  water. Big rain falls, the pigment keeps spreading, and the whole lake dances to whatever
+  your computer is playing.</p>
+  <div class="badge" id="badge">starting...</div>
+  <span class="ver" id="verHud">build -</span>
+  <div class="meter"><div id="mFill"></div></div>
+  <div class="audiostate" id="aStatusHud">sound input off</div>
+  <div class="srcstate" id="srcState">source: -</div>
+</div>
+
+<div class="panel">
+  <div class="panelhead">
+    <span>Controls</span>
+    <span class="ver" id="verStamp">build -</span>
+  </div>
+
+  <div class="stats">
+    <span id="sFps">- fps</span><span id="sCount">-</span><span id="sRain">-</span>
+  </div>
+
+  <h2>Scene</h2>
+  <div class="row">
+    <button id="bPause">Pause</button>
+    <button id="bBurst">Burst now</button>
+    <button id="bClear">Clear</button>
+  </div>
+
+  <h2>Bursts</h2>
+  <div class="lbl"><span>Balls per burst</span><b id="vBalls"></b></div>
+  <input type="range" id="rBalls" min="0" max="90" step="1" value="30">
+  <label class="chk"><input type="checkbox" id="cAlt" checked> Alternate 30 - 50 - 30 - 50</label>
+  <div class="lbl"><span>Gap min (s)</span><b id="vGapMin"></b></div>
+  <input type="range" id="rGapMin" min="0.5" max="12" step="0.5" value="3">
+  <div class="lbl"><span>Gap max (s)</span><b id="vGapMax"></b></div>
+  <input type="range" id="rGapMax" min="0.5" max="14" step="0.5" value="7">
+
+  <h2>Water</h2>
+  <div class="lbl"><span>Wave speed</span><b id="vWaveSpeed"></b></div>
+  <input type="range" id="rWaveSpeed" min="0" max="6" step="0.05" value="1.2">
+  <div class="lbl"><span>Wave height</span><b id="vWave"></b></div>
+  <input type="range" id="rWave" min="0" max="6" step="0.05" value="1">
+  <label class="chk"><input type="checkbox" id="cTall"> Extra high wave height (x2.2)</label>
+  <label class="chk"><input type="checkbox" id="cSoft" checked> Softer wave crests</label>
+  <div class="lbl"><span>Spread</span><b id="vSpread"></b></div>
+  <input type="range" id="rSpread" min="0" max="3" step="0.05" value="1">
+
+  <h2>Sound</h2>
+  <div class="row">
+    <button id="bSystem" class="primary">Capture system audio</button>
+  </div>
+  <div class="row">
+    <button id="bMic">Use microphone</button>
+  </div>
+  <label class="chk"><input type="checkbox" id="cAudio"> Sound input enabled</label>
+  <div class="lbl"><span>Sensitivity / gain</span><b id="vSens"></b></div>
+  <input type="range" id="rSens" min="0.1" max="5" step="0.05" value="1">
+  <div class="lbl"><span>Audio wave height</span><b id="vAudioH"></b></div>
+  <input type="range" id="rAudioH" min="0" max="1" step="0.01" value="0.45">
+  <div class="lbl"><span>Smoothing (release)</span><b id="vSmooth"></b></div>
+  <input type="range" id="rSmooth" min="0.05" max="6" step="0.05" value="0.35">
+  <div class="lbl"><span>Sustain through gaps</span><b id="vGapHold"></b></div>
+  <input type="range" id="rGapHold" min="0" max="8" step="0.25" value="3">
+  <label class="chk"><input type="checkbox" id="cBeats" checked> Beat rings on the lake</label>
+  <div class="lbl"><span>Beat sensitivity</span><b id="vBeatSens"></b></div>
+  <input type="range" id="rBeatSens" min="0.4" max="3" step="0.05" value="1">
+  <div class="lbl"><span>Input level</span><b id="vAudio">-</b></div>
+  <div class="statusline" id="aStatus">sound input off</div>
+  <div class="alert none" id="aAlert"></div>
+  <div class="tip" id="aTip" style="display:none"></div>
+  <div class="diag" id="aDiag">booting...</div>
+  <div class="row"><button id="bDiag">Copy diagnostics</button></div>
+
+  <h2>Processing</h2>
+  <div class="lbl"><span>Long-term RMS window</span><b id="vRing"></b></div>
+  <input type="range" id="rRing" min="64" max="8192" step="16" value="336">
+  <label class="chk"><input type="checkbox" id="cGapFill" checked> Gap-fill level from buffer</label>
+  <div class="lbl"><span>Analysis rate</span><b id="vLoad"></b></div>
+  <div class="diag" id="pDiag">idle</div>
+
+  <h2>Weather</h2>
+  <div class="lbl"><span>Big rain drops / sec</span><b id="vRain"></b></div>
+  <input type="range" id="rRain" min="0" max="24" step="0.5" value="7">
+
+  <h2>Look</h2>
+  <label class="chk"><input type="checkbox" id="cFlow" checked> Background flow</label>
+  <label class="chk"><input type="checkbox" id="cCursor" checked> Cursor paints</label>
+  <label class="chk"><input type="checkbox" id="cPaper"> Paper (light) theme</label>
+
+  <h2>Performance</h2>
+  <div class="row">
+    <button id="bFps30">30 FPS</button>
+    <button id="bFps60" class="on">60 FPS</button>
+    <button id="bFpsMax">Max</button>
+  </div>
+  <div class="statusline" id="fpsLabel">Display target: 60 FPS &middot; audio sampling: up to 60 Hz</div>
+  <div class="note">60 FPS is the balanced display setting. Audio sampling runs on the animation clock, separately from drawing,
+  and is limited by the rate at which the browser delivers animation callbacks (up to 60 samples per second).</div>
+</div>
+
+<div class="hint">
+  click = spawn ball &middot; space = burst &middot; <b>P</b> pause &middot; <b>R</b> reset
+  &middot; <b>F</b> fullscreen &middot; <b>I</b> hide/show controls
+</div>
+<button class="showbtn" id="bShow">I - show controls</button>
+
+<script>
+"use strict";
+
+/* ============================================================
+   BUILD
+   ============================================================ */
+var BUILD={version:'2.8',name:'Watercolor Bingo Rain',released:'2026-11-15'};
+var EXPECTED_SECTIONS=['Scene','Bursts','Water','Sound','Processing','Weather','Look','Performance'];
+
+/* ============================================================
+   ERROR TRAP
+   ============================================================ */
+(function(){
+  var box=document.getElementById('err');
+  var last='';
+  function show(m){
+    last=m;
+    if(!box)return;
+    box.style.display='block';
+    box.textContent=m;
+  }
+  window.__wbrLastError=function(){ return last; };
+  if(box){
+    box.addEventListener('click',function(){
+      if(navigator.clipboard) navigator.clipboard.writeText(last).catch(function(){});
+    });
+  }
+  window.addEventListener('error',function(e){
+    if(e.target && e.target!==window){
+      show('! Failed to load a resource:\n'+(e.target.src||e.target.href||'(unknown)'));
+      return;
+    }
+    var st='';
+    if(e.error && e.error.stack) st=String(e.error.stack).split('\n').slice(0,4).join('\n');
+    show('! JavaScript error\n'+(e.message||'unknown')+
+         '\nline '+(e.lineno||0)+':'+(e.colno||0)+(st?('\n'+st):'')+
+         '\n\n(click this box to copy)');
+    if(e.error && console.error) console.error(e.error);
+  });
+  window.addEventListener('unhandledrejection',function(e){
+    show('! Unhandled promise rejection\n'+
+ ((e.reason&&e.reason.message)||e.reason||'unknown')+'\n\n(click to copy)');
+  });
+})();
+
+(function(){
+'use strict';
+
+/* ============================================================
+   SAFE DOM HELPERS
+   on() returns the element (or a harmless stand-in) so a chained
+   expression such as on('x').onclick = fn can never throw.
+   ============================================================ */
+var wiredCount = 0;
+var missingIds = [];
+
+function el(id){
+  var e = document.getElementById(id);
+  if (e) return e;
+  return {
+    value:'0', textContent:'', checked:false, disabled:true,
+    style:{}, dataset:{},
+    classList:{ add:function(){}, remove:function(){}, toggle:function(){}, contains:function(){return false;} },
+    addEventListener:function(){}, removeEventListener:function(){},
+    setAttribute:function(){}, getAttribute:function(){ return null; },
+    appendChild:function(){}, focus:function(){}, click:function(){}
+  };
+}
+function setTxt(id,txt){ var e=document.getElementById(id); if(e) e.textContent=txt; }
+function miss(id){ if(missingIds.indexOf(id)<0) missingIds.push(id); }
+function on(id,evt,fn){
+  var e=document.getElementById(id);
+  if(!e){ miss(id); return el(id); }
+  try{ e.addEventListener(evt,fn); wiredCount++; }catch(err){ miss(id); }
+  return e;
+}
+function onEach(ids,evt,fn){
+  for(var i=0;i<ids.length;i++){
+    var e=document.getElementById(ids[i]);
+    if(!e){ miss(ids[i]); continue; }
+    try{ e.addEventListener(evt,fn); wiredCount++; }catch(err){ miss(ids[i]); }
+  }
+}
+
+/* ============================================================
+   NUMERIC + COLOUR SAFETY
+   num() and str() are used by the diagnostics reporter, which is the
+   only function that touches every field, so it is the most likely
+   place to hit an undefined value. These make it impossible for a
+   missing field to crash the artwork.
+   ============================================================ */
+function isFin(v){ return typeof v==='number' && isFinite(v); }
+function num(v,d){ return (isFin(v)?v:0).toFixed(d===undefined?2:d); }
+function str(v){ return (v===undefined||v===null)?'(none)':String(v); }
+function hsla(h,s,l,a){
+  var H=isFin(h)?h:200;
+  H=((H%360)+360)%360;
+  if(!isFin(s))s=80;
+  if(!isFin(l))l=60;
+  if(!isFin(a))a=1;
+  return 'hsla('+H+','+s+'%,'+l+'%,'+a+')';
+}
+function sumSquares(buf){
+  var s=0;
+  for(var i=0;i<buf.length;i++){ var v=buf[i]; s+=v*v; }
+  return s;
+}
+
+/* ============================================================
+   CONFIG
+   ============================================================ */
+var S={
+  theme:'deep', bgFlow:true, cursorPaint:true,
+  waveAmp:1.0, waveSpeed:1.2, spread:1.0,
+  softCrests:true, extraTall:false, boost:1,
+  audioPx:0, sensitivity:1.0, audioHeight:0.45, release:0.35,
+  gapHold:3.0,
+  beats:true, beatSens:1.0,
+  ringMs:336,
+  gapFill:true,
+  ballsPerBurst:30, alternate:true, gapMin:3, gapMax:7, rain:7,
+  paused:false, uiHidden:false,
+  fpsMode:'60', fpsTarget:60
+};
+/* v2.7 hardening: the state objects are also reachable globally, so a
+   hand-edited copy of this file can never die with "AU is not defined". */
+window.S=S;
+
+var BALL_HUES=[4,22,40,58,86,110,140,166,186,199,206,216,232,252,270,288,304,320,338];
+var GRAV=1750;
+var FFT_SIZE=8192;      /* 170 ms window: even at 8 fps the ring gets every sample */
+var FAST_LEN=2048;
+var FLUX_HIST=48;
+var DB_FLOOR=-200;
+var BS=256;
+
+var canvas=document.getElementById('scene');
+var ctx=canvas.getContext('2d');
+var HAS_FILTER=('filter' in ctx);
+var W=0,H=0,DPR=1,groundBase=0;
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function smooth(t){ return t*t*(3-2*t); }
+function lerp(a,b,t){ return a+(b-a)*t; }
+
+/* ============================================================
+   AUDIO STATE
+   ============================================================ */
+var AU={
+  ctx:null, analyser:null, src:null, stream:null, silent:null, videoTrack:null,
+  timeBuf:null, freqBuf:null, prevFreq:null,
+  ring:new Float32Array(16384), ringLen:16384, ringPos:0, ringFill:0,
+  ringBlocks:new Float64Array(1),
+  fast:new Float32Array(FAST_LEN), fastPos:0, fastFill:0,
+  rms:0, rmsFast:0, rmsLong:0,
+  avg:0, ref:0.004, norm:0, level:0,
+  floor:0, gate:0.0015,
+  bassDb:-100, midDb:-100, highDb:-100,
+  bass:0, mid:0, high:0,
+  beat:0, beatCool:0,
+  bassFlux:0, midFlux:0, allFlux:0, thrB:0, thrM:0, medB:0, medM:0,
+  peak:0, ratioB:0, ratioM:0, rawMs:0, dropped:0,
+  gaps:0, gapCounted:false,
+  bassHist:new Float32Array(FLUX_HIST), midHist:new Float32Array(FLUX_HIST), histHi:0,
+  active:false, mode:'none',
+  lastResumeTry:0, needsGesture:false,
+  lastCtxTime:0, lastAdvTime:0, threadAlive:true,
+  gapFrames:0, gapPct:0, gapRun:0, sinceGap:99, adv:0, totalFrames:0,
+  gapTime:0, totalTime:0, analysisRate:0, analysisRateElapsed:0, analysisRateCount:0, analysisRateReady:false
+};
+/* v2.7 hardening - same idea, for the audio state object. */
+window.AU=AU;
+
+/* ============================================================
+   INTEGRITY SELF-CHECK
+   If this file was damaged while being copied, say so in plain
+   English instead of throwing "AU is not defined".
+   ============================================================ */
+(function(){
+  try{
+    var need=[
+      "version:'2.8'",
+      "function waveY(p,u,t){",
+      "function drawWater(p,t){",
+      "function drawLakeBase(t){",
+      "function spawnWater(x,y,hue,r){",
+      "function sheetAmp(p){",
+      "var WGAIN=0.65;",
+      "drawLakeBase(t);",
+      "the sheets never merge",
+      "fpsMode:'60'",
+      "maxDecibels=-20",
+      "AU.ratioB=AU.bassFlux/bassRef;",
+      "imageSmoothingQuality='low'",
+      "function buildVignette(){",
+      "function sampleAudio(dt){"
+    ];
+    var html=document.documentElement.innerHTML;
+    var miss=[];
+    for(var i=0;i<need.length;i++){ if(html.indexOf(need[i])<0) miss.push(need[i]); }
+    if(miss.length){
+      var box=document.getElementById('err');
+      if(box){
+        box.style.display='block';
+        box.textContent='! THIS COPY IS INCOMPLETE\nMissing from the file:\n  - '+
+          miss.join('\n  - ')+
+          '\n\nSave the file again as UTF-8 (not UTF-16), then reload.';
+      }
+    }
+  }catch(e){}
+})();
+
+function modeLabel(m){ return m==='system'?'system audio':m==='mic'?'microphone':'-'; }
+function setAudioStatus(txt,kind){
+  var h=el('aStatusHud'), p=el('aStatus');
+  if(h) h.textContent=(kind==='ok'?'[sound] ':kind==='warn'?'[!] ':'[off] ')+txt;
+  if(p){ p.textContent=txt; p.className='statusline'+(kind==='ok'?' ok':kind==='warn'?' warn':''); }
+}
+function showRestorePill(on){ document.body.classList.toggle('showrestore',!!on); }
+function showTip(txt){
+  var e=el('aTip');
+  if(!e)return;
+  if(txt){ e.style.display='block'; e.textContent=txt; } else e.style.display='none';
+}
+function showAlert(html){
+  var e=el('aAlert');
+  if(!e)return;
+  if(html){ e.innerHTML=html; e.classList.remove('none'); } else e.classList.add('none');
+}
+function browserName(){
+  var c=/Chrome\/(\d+)/.exec(navigator.userAgent);
+  var e=/Edg\/(\d+)/.exec(navigator.userAgent);
+  var f=/Firefox\/(\d+)/.exec(navigator.userAgent);
+  return (e?'Edge '+(e[1]||''):c?'Chrome '+(c[1]||''):f?'Firefox '+(f[1]||''):'unknown');
+}
+
+/* -- the long ring keeps per-block sums: exact and O(blocks) -- */
+function setRingLen(ms){
+  var sr=(AU.ctx?AU.ctx.sampleRate:48000);
+  var n=Math.max(2048,Math.round(sr*ms/1000));
+  if(n===AU.ringLen && AU.ring.length===n) return;
+  AU.ringLen=n;
+  AU.ring=new Float32Array(n);
+  AU.ringBlocks=new Float64Array(Math.ceil(n/BS));
+  AU.ringPos=0; AU.ringFill=0;
+}
+function ringTotal(){
+  var s=0;
+  for(var i=0;i<AU.ringBlocks.length;i++) s+=AU.ringBlocks[i];
+  return s;
+}
+
+async function ensureCtx(){
+  if(!AU.ctx){
+    var AC=window.AudioContext||window.webkitAudioContext;
+    if(!AC)return false;
+    AU.ctx=new AC();
+    AU.silent=AU.ctx.createGain();
+    AU.silent.gain.value=0.0001;
+    AU.silent.connect(AU.ctx.destination);
+    setRingLen(S.ringMs);
+  }
+  if(AU.ctx.state==='suspended'){ try{ await AU.ctx.resume(); }catch(e){} }
+  return AU.ctx.state==='running';
+}
+
+async function attachStream(stream,mode){
+  await ensureCtx();
+  if(!AU.ctx){ setAudioStatus('audio engine unavailable','warn'); return false; }
+  stopAudio();
+  AU.stream=stream;
+  stream.getAudioTracks().forEach(function(tr){
+    tr.onended=function(){
+      AU.active=false;
+      setAudioStatus('sound stopped - click to reconnect','warn');
+      showRestorePill(true);
+    };
+  });
+  var audioOnly=new MediaStream(stream.getAudioTracks());
+  AU.src=AU.ctx.createMediaStreamSource(audioOnly);
+  AU.analyser=AU.ctx.createAnalyser();
+  AU.analyser.fftSize=FFT_SIZE;
+  AU.analyser.smoothingTimeConstant=0;
+  AU.analyser.minDecibels=-100;
+  AU.analyser.maxDecibels=-20;
+  AU.src.connect(AU.analyser);
+  AU.analyser.connect(AU.silent);
+  AU.timeBuf=new Float32Array(AU.analyser.fftSize);
+  AU.freqBuf=new Float32Array(AU.analyser.frequencyBinCount);
+  AU.prevFreq=new Float32Array(AU.analyser.frequencyBinCount);
+  AU.fast=new Float32Array(FAST_LEN); AU.fastPos=0; AU.fastFill=0;
+  setRingLen(S.ringMs);
+  AU.active=true; AU.needsGesture=false; AU.mode=mode;
+  AU.avg=0; AU.ref=0.004; AU.level=0; AU.beat=0; AU.beatCool=0;
+  AU.floor=0; AU.gate=0.0015;
+  AU.peak=0; AU.ratioB=0; AU.ratioM=0; AU.dropped=0;
+  AU.bassDb=-100; AU.midDb=-100; AU.highDb=-100;
+  AU.bassHist.fill(0); AU.midHist.fill(0); AU.histHi=0;
+  AU.bassFlux=0; AU.midFlux=0; AU.allFlux=0; AU.thrB=0; AU.thrM=0;
+  AU.gapFrames=0; AU.gapPct=0; AU.gapRun=0; AU.sinceGap=99; AU.totalFrames=0;
+  AU.gapTime=0; AU.totalTime=0;
+  AU.analysisRate=0; AU.analysisRateElapsed=0; AU.analysisRateCount=0; AU.analysisRateReady=false;
+  AU.gaps=0; AU.gapCounted=false;
+  AU.lastCtxTime=AU.ctx.currentTime; AU.lastAdvTime=AU.ctx.currentTime;
+  showRestorePill(false); showTip(null); showAlert(null);
+  setAudioStatus(modeLabel(mode)+' live','ok');
+  return true;
+}
+
+async function captureSystem(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getDisplayMedia){
+    setAudioStatus('screen capture unavailable in this browser','warn');
+    return false;
+  }
+  try{
+    var stream=await navigator.mediaDevices.getDisplayMedia({
+      video:true,
+      audio:{
+        echoCancellation:false,
+        noiseSuppression:false,
+        autoGainControl:false,
+        systemAudio:'include'
+      }
+    });
+    if(stream.getAudioTracks().length===0){
+      stream.getTracks().forEach(function(t){ t.stop(); });
+      setAudioStatus('no audio shared - tick "Share audio" and pick a screen','warn');
+      showAlert('<b>No audio was shared.</b><br>'+
+        'In the share dialog choose <b>Entire Screen</b> (for all system sound) '+
+        'or a <b>Window</b>, then tick <b>Share audio</b>.');
+      return false;
+    }
+    AU.videoTrack=stream.getVideoTracks()[0]||null;
+    return await attachStream(stream,'system');
+  }catch(err){
+    var n=err&&err.name;
+    var m=(n==='NotAllowedError')?'share cancelled':((err&&err.message)||'failed');
+    setAudioStatus('capture: '+m,'warn');
+    return false;
+  }
+}
+
+async function captureMic(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){
+    setAudioStatus('microphone unavailable','warn');
+    return false;
+  }
+  try{
+    var stream=await navigator.mediaDevices.getUserMedia({
+      audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},
+      video:false
+    });
+    return await attachStream(stream,'mic');
+  }catch(err){
+    var n=err&&err.name;
+    var m=(n==='NotAllowedError')?'permission denied'
+           :(n==='NotFoundError')?'no microphone found'
+           :((err&&err.message)||'failed');
+    setAudioStatus('mic: '+m,'warn');
+    showRestorePill(true);
+    return false;
+  }
+}
+
+function stopAudio(){
+  if(AU.stream){ AU.stream.getTracks().forEach(function(t){ try{t.stop();}catch(e){} }); AU.stream=null; }
+  if(AU.videoTrack){ try{AU.videoTrack.stop();}catch(e){} AU.videoTrack=null; }
+  if(AU.src){ try{AU.src.disconnect();}catch(e){} AU.src=null; }
+  if(AU.analyser){ try{AU.analyser.disconnect();}catch(e){} AU.analyser=null; }
+  AU.active=false; AU.rms=0; AU.rmsFast=0; AU.rmsLong=0;
+  AU.avg=0; AU.norm=0; AU.level=0; AU.floor=0; AU.gate=0.0015;
+  AU.peak=0; AU.ratioB=0; AU.ratioM=0; AU.dropped=0;
+  AU.bass=0; AU.mid=0; AU.high=0; AU.beat=0; AU.beatCool=0;
+  AU.bassFlux=0; AU.midFlux=0; AU.allFlux=0; AU.thrB=0; AU.thrM=0;
+  AU.bassHist.fill(0); AU.midHist.fill(0); AU.histHi=0;
+  AU.gapFrames=0; AU.gapPct=0; AU.gapRun=0; AU.sinceGap=99; AU.totalFrames=0;
+  AU.gapTime=0; AU.totalTime=0;
+  AU.analysisRate=0; AU.analysisRateElapsed=0; AU.analysisRateCount=0; AU.analysisRateReady=false;
+  AU.gaps=0; AU.gapCounted=false;
+  AU.needsGesture=false; AU.threadAlive=true;
+  AU.ringFill=0; AU.ringPos=0; AU.fastFill=0; AU.fastPos=0;
+  S.audioPx=0;
+  showRestorePill(false);
+}
+
+async function rearmAudio(){
+  if(!AU.ctx||!AU.active)return;
+  if(AU.ctx.state==='suspended'){
+    try{ await AU.ctx.resume(); }catch(e){ AU.needsGesture=true; }
+    if(AU.ctx.state==='running'){
+      AU.needsGesture=false; showRestorePill(false);
+      setAudioStatus(modeLabel(AU.mode)+' live','ok');
+    }
+  }
+  var live=AU.stream&&AU.stream.getAudioTracks().some(function(t){ return t.readyState==='live'; });
+  if(!live){
+    AU.active=false; AU.needsGesture=true;
+    setAudioStatus('sound stopped - click to reconnect','warn');
+    showRestorePill(true);
+  }
+}
+
+/* -- average band level in dB (sample-rate independent) --
+   getFloatFrequencyData returns -Infinity for silent bins, which would
+   poison the sum and then produce NaN on the next frame, so every bin
+   is floored before averaging.                                      */
+function bandDb(lo,hi){
+  var f=AU.freqBuf;
+  if(!f||!AU.ctx)return -100;
+  var nyq=AU.ctx.sampleRate/2;
+  var binHz=nyq/f.length;
+  var i0=Math.max(0,Math.floor(lo/binHz));
+  var i1=Math.min(f.length-1,Math.ceil(hi/binHz));
+  var s=0,c=0;
+  for(var i=i0;i<=i1;i++){
+    var v=f[i];
+    if(!isFin(v)) v=DB_FLOOR;
+    if(v<DB_FLOOR) v=DB_FLOOR;
+    s+=v; c++;
+  }
+  return c? s/c : -100;
+}
+
+/* -- ROBUST statistics: median + MAD --
+   The mean/stddev version was wrecked by a single huge kick: the spike
+   inflated the standard deviation, which then raised the threshold far
+   above normal beats for the next ~0.8 s, so the detector went deaf.
+   The median and the median-absolute-deviation ignore outliers.       */
+function robustStats(arr){
+  var n=arr.length;
+  var s=Array.prototype.slice.call(arr).sort(function(a,b){return a-b;});
+  var med=s[n>>1];
+  var d=new Array(n);
+  for(var i=0;i<n;i++) d[i]=Math.abs(s[i]-med);
+  d.sort(function(a,b){return a-b;});
+  return {m:med, s:d[n>>1]*1.4826};
+}
+
+function sampleAudio(dt){
+  if(!AU.active||!AU.analyser){ AU.level=0; S.audioPx=0; return false; }
+  var now=performance.now();
+
+  /* Do not analyse a frozen AudioContext snapshot. A resume is attempted,
+     but processing resumes on a later animation callback after the audio
+     clock has actually advanced. */
+  if(AU.ctx&&AU.ctx.state!=='running'){
+    if(AU.ctx.state==='suspended'&&now-AU.lastResumeTry>1000){
+      AU.lastResumeTry=now;
+      AU.ctx.resume().then(function(){
+        showRestorePill(false); setAudioStatus(modeLabel(AU.mode)+' live','ok');
+      }).catch(function(){
+        AU.needsGesture=true; showRestorePill(true);
+        setAudioStatus('browser paused the audio - click to reconnect','warn');
+      });
+    }
+    AU.threadAlive=false;
+    return false;
+  }
+
+  var ct=AU.ctx.currentTime;
+  if(!isFin(dt)||dt<=0){ AU.threadAlive=false; return false; }
+  if(ct<=AU.lastCtxTime){ AU.threadAlive=false; return false; }
+  AU.lastCtxTime=ct;
+  AU.threadAlive=true;
+
+  /* Measured rate is based on real analyser snapshots, not an assumed FFT
+     hop size. dt is the elapsed wall time since the previous fresh snapshot. */
+  AU.analysisRateElapsed+=dt;
+  AU.analysisRateCount++;
+  if(AU.analysisRateElapsed>=1){
+    AU.analysisRate=AU.analysisRateCount/AU.analysisRateElapsed;
+    AU.analysisRateReady=true;
+    AU.analysisRateElapsed=0;
+    AU.analysisRateCount=0;
+  }
+
+  AU.analyser.getFloatTimeDomainData(AU.timeBuf);
+  var adv=(ct-AU.lastAdvTime)*AU.ctx.sampleRate;
+  AU.lastAdvTime=ct;
+  if(!isFin(adv)||adv<0)adv=0;
+  AU.adv=adv;
+  var n=Math.round(adv);
+  if(n>AU.timeBuf.length){ AU.dropped+=n-AU.timeBuf.length; n=AU.timeBuf.length; }
+  if(n>0){
+    var start=AU.timeBuf.length-n;
+    var pos=AU.ringPos;
+    for(var i=0;i<n;i++){
+      var v=AU.timeBuf[start+i];
+      var b=(pos/BS)|0;
+      AU.ringBlocks[b]+=v*v-AU.ring[pos]*AU.ring[pos];
+      AU.ring[pos]=v;
+      pos++; if(pos>=AU.ringLen)pos=0;
+    }
+    AU.ringPos=pos;
+    AU.ringFill=Math.min(AU.ringLen,AU.ringFill+n);
+    var p2=AU.fastPos;
+    for(var j=0;j<n;j++){
+      AU.fast[p2]=AU.timeBuf[start+j];
+      p2++; if(p2>=FAST_LEN)p2=0;
+    }
+    AU.fastPos=p2;
+    AU.fastFill=Math.min(FAST_LEN,AU.fastFill+n);
+  }
+
+  AU.rmsFast = AU.fastFill ? Math.sqrt(Math.max(0,sumSquares(AU.fast))/AU.fastFill) : 0;
+  AU.rmsLong = AU.ringFill ? Math.sqrt(Math.max(0,ringTotal())/AU.ringFill) : 0;
+  if(!isFin(AU.rmsFast))AU.rmsFast=0;
+  if(!isFin(AU.rmsLong))AU.rmsLong=0;
+  AU.rms = S.gapFill ? Math.max(AU.rmsFast, AU.rmsLong*0.85) : AU.rmsFast;
+  if(!isFin(AU.rms))AU.rms=0;
+
+  /* auto-gain, relative */
+  var aUp=1-Math.exp(-dt/0.10), aDn=1-Math.exp(-dt/2.5);
+  AU.avg+=(AU.rms-AU.avg)*(AU.rms>AU.avg?aUp:aDn);
+  if(!isFin(AU.avg))AU.avg=0;
+  /* pure ratio - no absolute floor, so a quiet source responds
+     exactly as strongly as a loud one */
+  AU.ref=Math.max(AU.avg,1e-6);
+  AU.norm=Math.min(1.8,AU.rms/AU.ref);
+  if(!isFin(AU.norm))AU.norm=0;
+  /* peak hold, so the diagnostics can tell a quiet source from a silent one */
+  if(AU.rms>AU.peak) AU.peak=AU.rms;
+  else AU.peak=Math.max(0,AU.peak-dt*0.05);
+
+  /* NOISE FLOOR TRACKER - drops instantly, rises slowly */
+  if(AU.rmsFast < AU.floor) AU.floor = AU.rmsFast;
+  else AU.floor += (AU.rmsFast - AU.floor) * Math.min(1, dt*0.02);
+  if(!isFin(AU.floor)||AU.floor<0) AU.floor = 0;
+
+  /* RELATIVE GAP GATE - scale invariant, so the system volume slider
+     can never change the behaviour */
+  AU.gate = Math.max(AU.floor*2.0, AU.avg*0.05, 1e-6);
+  var silent = AU.rmsFast < AU.gate;
+
+  AU.totalFrames++;
+  AU.totalTime+=dt;
+  if(silent){
+    AU.gapFrames++; AU.gapRun+=dt; AU.sinceGap=0; AU.gapTime+=dt;
+    if(AU.gapRun>0.10 && !AU.gapCounted){ AU.gapCounted=true; AU.gaps++; }
+  }else{
+    AU.gapFrames=0; AU.gapRun=0; AU.sinceGap+=dt; AU.gapCounted=false;
+  }
+  /* Cumulative percentage of sampled audio time classified as a gap. */
+  AU.gapPct = AU.totalTime>0 ? (AU.gapTime/AU.totalTime*100) : 0;
+
+  var gained=clamp((AU.norm-0.20)*1.2,0,1);
+  gained=clamp(gained*S.sensitivity,0,1);
+  if(!isFin(gained))gained=0;
+
+  var atk=1-Math.exp(-dt/0.028);
+  var rel=1-Math.exp(-dt/Math.max(0.02,S.release));
+
+  if(silent && S.gapHold>0 && AU.gapRun<S.gapHold){
+    AU.level*=Math.pow(0.9995,dt*60); /* SUSTAIN through the gap; 60 Hz-equivalent decay */
+  }else{
+    AU.level+=(gained-AU.level)*(gained>AU.level?atk:rel);
+  }
+  if(!isFin(AU.level))AU.level=0;
+  AU.level=clamp(AU.level,0,1);
+
+  /* bands (EMA for display), preserving the original 0.18 response at 60 Hz
+     while keeping the smoothing time constant consistent at lower sample rates. */
+  AU.analyser.getFloatFrequencyData(AU.freqBuf);
+  var bandAlpha=1-Math.pow(1-0.18,dt*60);
+  AU.bassDb+=(bandDb(40,170)-AU.bassDb)*bandAlpha;
+  AU.midDb +=(bandDb(170,700)-AU.midDb)*bandAlpha;
+  AU.highDb+=(bandDb(2000,12000)-AU.highDb)*bandAlpha;
+  if(!isFin(AU.bassDb))AU.bassDb=-100;
+  if(!isFin(AU.midDb))AU.midDb=-100;
+  if(!isFin(AU.highDb))AU.highDb=-100;
+  var dbTo01=function(v){ return clamp((v+100)/80,0,1); };
+  AU.bass=dbTo01(AU.bassDb); AU.mid=dbTo01(AU.midDb); AU.high=dbTo01(AU.highDb);
+
+  /* SPECTRAL FLUX in the FLOAT dB domain */
+  var nyq=AU.ctx.sampleRate/2;
+  var binHz=nyq/AU.freqBuf.length;
+  var len=AU.freqBuf.length;
+  var b0=Math.max(0,Math.floor(50/binHz));
+  var b1=Math.min(len-1,Math.ceil(190/binHz));
+  var m0=Math.max(0,Math.floor(500/binHz));
+  var m1=Math.min(len-1,Math.ceil(12000/binHz));
+  var ff=AU.freqBuf, pf=AU.prevFreq;
+  var all=0, bf=0, mf=0, cB=0, cM=0;
+  for(var i=0;i<len;i++){
+    var d=ff[i]-pf[i];
+    if(d>0 && isFin(d)){
+      all+=d;
+      if(i>=b0&&i<=b1){ bf+=d; cB++; }
+      else if(i>=m0&&i<=m1){ mf+=d; cM++; }
+    }
+    pf[i]=ff[i];
+  }
+  AU.allFlux=all/len;
+  AU.bassFlux=cB?bf/cB:0;
+  AU.midFlux =cM?mf/cM:0;
+  if(!isFin(AU.bassFlux))AU.bassFlux=0;
+  if(!isFin(AU.midFlux))AU.midFlux=0;
+
+  /* ROBUST adaptive threshold, gap aware */
+  if(!silent){
+    AU.bassHist[AU.histHi]=AU.bassFlux;
+    AU.midHist[AU.histHi]=AU.midFlux;
+    AU.histHi=(AU.histHi+1)%FLUX_HIST;
+  }
+  var bs=robustStats(AU.bassHist), ms=robustStats(AU.midHist);
+  AU.medB=bs.m; AU.medM=ms.m;
+  /* RATIO threshold. The flux is compared to its own running median,
+     so the detector behaves identically at any source level - and the
+     MAD term can no longer dominate and deafen the detector. */
+  var bassRef=Math.max(bs.m,0.05);
+  var midRef =Math.max(ms.m,0.02);
+  AU.ratioB=AU.bassFlux/bassRef;
+  AU.ratioM=AU.midFlux/midRef;
+  AU.thrB=2.2/S.beatSens;
+  AU.thrM=2.2/S.beatSens;
+
+  AU.beatCool-=dt;
+  AU.beat*=Math.exp(-dt/0.20);
+  var hit=false, strength=0;
+  /* a beat needs real signal behind it, not just noise */
+  if(AU.sinceGap>0.05 && bs.m>0.30){
+    if(AU.ratioB>AU.thrB){ hit=true; strength=1; }
+    else if(AU.ratioM>AU.thrM){ hit=true; strength=0.55; }
+  }
+  if(S.beats&&hit&&AU.beatCool<=0){
+    AU.beatCool=0.13;
+    AU.beat=Math.max(AU.beat,strength);
+    spawnBeatRings(strength);
+  }
+  return true; /* one fresh analyser snapshot was processed */
+}
+
+/* ============================================================
+   RESIZE
+   ============================================================ */
+function resize(){
+  DPR=Math.min(2,window.devicePixelRatio||1);
+  W=window.innerWidth;H=window.innerHeight;
+  canvas.width=Math.round(W*DPR);canvas.height=Math.round(H*DPR);
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  groundBase=H*0.865;
+  reanchor(); buildBg(); buildNoise(); buildVignette();
+}
+window.addEventListener('resize',resize);
+function reanchor(){
+  for(var i=0;i<waters.length;i++) waters[i].y=groundY(waters[i].x);
+  for(var j=0;j<drops.length;j++) drops[j].y=Math.min(drops[j].y,groundY(drops[j].x)-2);
+  ripples.length=0; rain.length=0; beats.length=0;
+}
+
+/* ============================================================
+   BACKGROUND - watercolor wash
+   ============================================================ */
+var BG_SCALE=0.055;
+var bgC=null,bgX=null;
+var blobs=[],washes=[];
+function buildBg(){
+  bgC=document.createElement('canvas');
+  bgC.width=Math.max(4,Math.round(W*BG_SCALE));
+  bgC.height=Math.max(4,Math.round(H*BG_SCALE));
+  bgX=bgC.getContext('2d');
+  initBlobs();
+}
+function initBlobs(){
+  blobs.length=0; washes.length=0;
+  for(var i=0;i<9;i++) washes.push({x:Math.random(),y:Math.random(),
+    ax:.10+Math.random()*.22,ay:.08+Math.random()*.20,
+    sx:.010+Math.random()*.022,sy:.008+Math.random()*.020,
+    phx:Math.random()*6.283,phy:Math.random()*6.283,
+    r:.55+Math.random()*.55,hue:Math.random()*360,
+    sat:50+Math.random()*36,lit:40+Math.random()*28,a:.14+Math.random()*.13});
+  for(var k=0;k<30;k++) blobs.push({x:Math.random(),y:Math.random(),
+    ax:.08+Math.random()*.30,ay:.07+Math.random()*.28,
+    sx:.016+Math.random()*.055,sy:.014+Math.random()*.050,
+    phx:Math.random()*6.283,phy:Math.random()*6.283,
+    r:.16+Math.random()*.40,hue:Math.random()*360,
+    sat:55+Math.random()*38,lit:40+Math.random()*30,a:.10+Math.random()*.16});
+}
+function pigment(g,x,y,r,hue,sat,lit,a){
+  var h2=((hue+22)%360+360)%360;
+  var grd=g.createRadialGradient(x,y,0,x,y,r);
+  grd.addColorStop(0.00,hsla(hue,sat,lit,a));
+  grd.addColorStop(0.38,hsla(hue+6,sat,lit,a*0.55));
+  grd.addColorStop(0.70,hsla(h2,sat-6,lit-4,a*0.20));
+  grd.addColorStop(0.86,hsla(h2,sat,lit-3,a*0.30));
+  grd.addColorStop(0.95,hsla(h2,sat,lit,a*0.07));
+  grd.addColorStop(1.00,hsla(h2,sat,lit,0));
+  g.fillStyle=grd;g.beginPath();g.arc(x,y,r,0,6.2832);g.fill();
+}
+function drawBg(t){
+  var w=bgC.width,h=bgC.height,dark=S.theme==='deep';
+  bgX.globalCompositeOperation='source-over';
+  bgX.fillStyle=dark?'#070d1a':'#f5efe2';bgX.fillRect(0,0,w,h);
+  bgX.globalCompositeOperation=dark?'lighter':'multiply';
+  var kg=bgX.createRadialGradient(w*.36,h*.28,0,w*.36,h*.28,w*.95);
+  if(dark){kg.addColorStop(0,'rgba(46,92,138,0.50)');kg.addColorStop(1,'rgba(0,0,0,0)');}
+  else{kg.addColorStop(0,'rgba(255,252,242,0.95)');kg.addColorStop(1,'rgba(255,255,255,0)');}
+  bgX.fillStyle=kg;bgX.fillRect(0,0,w,h);
+  var fl=S.bgFlow?1:0;
+  for(var i=0;i<washes.length;i++){
+    var b=washes[i];
+    var x=b.x*w+Math.sin(t*b.sx*fl+b.phx)*b.ax*w*fl;
+    var y=b.y*h+Math.sin(t*b.sy*fl+b.phy)*b.ay*h*fl;
+    var r=b.r*Math.min(w,h)*(1+.12*Math.sin(t*.07+b.phx));
+    pigment(bgX,x,y,r,(b.hue+t*1.6*fl)%360,b.sat,b.lit,b.a);
+  }
+  for(var k=0;k<blobs.length;k++){
+    var c=blobs[k];
+    var x2=c.x*w+Math.sin(t*c.sx*fl+c.phx)*c.ax*w*fl;
+    var y2=c.y*h+Math.sin(t*c.sy*fl+c.phy)*c.ay*h*fl;
+    if(S.cursorPaint&&pointer.on){
+      var dx=pointer.x-c.x*W,dy=pointer.y-c.y*H,d=Math.hypot(dx,dy);
+      if(d<380){var kk=(1-d/380)*.26;x2+=dx/(d+1)*kk*w;y2+=dy/(d+1)*kk*h;}
+    }
+    var r2=c.r*Math.min(w,h)*(1+.18*Math.sin(t*.11+c.phx));
+    pigment(bgX,x2,y2,r2,(c.hue+t*3.0*fl)%360,c.sat,c.lit,c.a);
+  }
+  if(S.cursorPaint&&pointer.on){
+    var cx=pointer.x*BG_SCALE,cy=pointer.y*BG_SCALE;
+    var hue=(pointer.hue+t*10)%360;
+    pigment(bgX,cx,cy,Math.min(w,h)*.26,hue,72,54,.34);
+    pigment(bgX,cx,cy,Math.min(w,h)*.12,(hue+50)%360,82,62,.28);
+  }
+  bgX.globalCompositeOperation='source-over';
+}
+
+/* ============================================================
+   GRAIN / VIGNETTE
+   ============================================================ */
+var noisePat=null;
+var vigC=null;
+function buildNoise(){
+  var s=220,c=document.createElement('canvas');c.width=c.height=s;
+  var g=c.getContext('2d'),img=g.createImageData(s,s);
+  for(var i=0;i<img.data.length;i+=4){
+    var sp=Math.random()<.035;
+    var v=sp?120+Math.random()*70:226+Math.random()*29;
+    img.data[i]=v;img.data[i+1]=v;img.data[i+2]=v;img.data[i+3]=255;
+  }
+  g.putImageData(img,0,0);noisePat=ctx.createPattern(c,'repeat');
+}
+function drawGrain(){
+  if(!noisePat)return;ctx.save();
+  ctx.globalAlpha=S.theme==='deep'?.05:.30;
+  ctx.globalCompositeOperation=S.theme==='deep'?'overlay':'multiply';
+  ctx.fillStyle=noisePat;ctx.fillRect(0,0,W,H);ctx.restore();
+}
+/* The vignette is a STATIC full-screen gradient - filling one every frame
+   costs a full-screen radial rasterisation. Render it once per resize
+   into an offscreen canvas and blit it instead. */
+function buildVignette(){
+  if(!vigC) vigC=document.createElement('canvas');
+  vigC.width=Math.max(1,W); vigC.height=Math.max(1,H);
+  var g2=vigC.getContext('2d');
+  var g=g2.createRadialGradient(W*.5,H*.5,Math.min(W,H)*.3,W*.5,H*.5,Math.max(W,H)*.78);
+  g.addColorStop(0,'rgba(0,0,0,0)');
+  g.addColorStop(1,S.theme==='deep'?'rgba(0,0,0,0.52)':'rgba(70,55,40,0.22)');
+  g2.fillStyle=g; g2.fillRect(0,0,W,H);
+}
+function drawVignette(){
+  if(!vigC) buildVignette();
+  ctx.drawImage(vigC,0,0,W,H);
+}
+
+/* ============================================================
+   BALL SPRITES
+   ============================================================ */
+var spriteCache=new Map();
+function polyPts(x,y,r,rot){
+  var p=[];
+  for(var i=0;i<5;i++){var a=rot+i*1.2566371;p.push([x+Math.cos(a)*r,y+Math.sin(a)*r]);}return p;
+}
+function tracePoly(g,p){g.beginPath();
+  for(var i=0;i<p.length;i++){ if(i)g.lineTo(p[i][0],p[i][1]); else g.moveTo(p[i][0],p[i][1]); }
+  g.closePath();}
+function ballSprite(hue,sat,lit,r){
+  var rb=Math.max(5,Math.round(r/3)*3);
+  var key=hue+'|'+sat+'|'+lit+'|'+rb;
+  if(spriteCache.has(key))return spriteCache.get(key);
+  if(spriteCache.size>420)spriteCache.clear();
+  var pad=Math.ceil(rb*.12)+3,s=Math.ceil((rb+pad)*2);
+  var c=document.createElement('canvas');c.width=c.height=s;
+  var g=c.getContext('2d'),cx=s/2,cy=s/2;
+  g.save();g.beginPath();g.arc(cx,cy,rb,0,6.2832);g.clip();
+  g.fillStyle='#f7f3e9';g.fillRect(0,0,s,s);
+  var panels=hsla(hue,sat,lit,1);
+  var seam='rgba(24,34,54,0.55)';
+  var lw=Math.max(1,rb*.045);
+  var cp=polyPts(cx,cy,rb*.40,-Math.PI/2);
+  g.fillStyle=panels;tracePoly(g,cp);g.fill();
+  g.strokeStyle=seam;g.lineWidth=lw;g.stroke();
+  var inners=[];
+  for(var i=0;i<5;i++){
+    var a=-Math.PI/2+Math.PI/5+i*1.2566371;
+    var ox=cx+Math.cos(a)*rb*.80,oy=cy+Math.sin(a)*rb*.80;
+    var op=polyPts(ox,oy,rb*.30,a+Math.PI);
+    g.fillStyle=panels;tracePoly(g,op);g.fill();
+    g.strokeStyle=seam;g.lineWidth=lw;g.stroke();
+    inners.push(op[0]);
+  }
+  g.strokeStyle=seam;g.lineWidth=lw;
+  for(var k=0;k<5;k++){
+    var c0=cp[k],c1=cp[(k+1)%5];
+    g.beginPath();g.moveTo(c0[0],c0[1]);g.lineTo(inners[k][0],inners[k][1]);g.stroke();
+    g.beginPath();g.moveTo(c1[0],c1[1]);g.lineTo(inners[k][0],inners[k][1]);g.stroke();
+  }
+  var sh=g.createRadialGradient(cx-rb*.32,cy-rb*.40,rb*.05,cx,cy,rb*1.05);
+  sh.addColorStop(0,'rgba(255,255,255,0.42)');sh.addColorStop(.55,'rgba(255,255,255,0)');
+  sh.addColorStop(1,'rgba(16,26,44,0.38)');g.fillStyle=sh;g.fillRect(0,0,s,s);
+  g.restore();
+  g.beginPath();g.arc(cx,cy,rb,0,6.2832);
+  g.strokeStyle='rgba(18,28,48,0.30)';g.lineWidth=Math.max(1,rb*.055);g.stroke();
+  var spr={canvas:c,size:s};spriteCache.set(key,spr);return spr;
+}
+
+/* ============================================================
+   ENTITIES
+   ============================================================ */
+var balls=[],waters=[],drops=[],rain=[],ripples=[],beats=[],dabs=[];
+var pointer={x:-999,y:-999,on:false,hue:200};
+function groundY(x){ return groundBase+Math.sin(x*.0082+1.2)*7+Math.sin(x*.0211+.4)*3.5; }
+function initDabs(){
+  dabs.length=0;
+  for(var i=0;i<90;i++) dabs.push({x:Math.random(),r:2+Math.random()*7,o:Math.random()*6.28,h:150+Math.random()*90});
+}
+function spawnBall(edgeBias){
+  var r=5+Math.pow(Math.random(),1.7)*42;
+  var x=0,y=0,vx=0,vy=0;
+  var fe=(edgeBias!==undefined)?edgeBias:Math.random();
+  if(fe<0.28){x=-r-4;y=groundY(W*.2)+(Math.random()*260-130);vx=120+Math.random()*240;vy=-60-Math.random()*140;}
+  else if(fe<0.56){x=W+r+4;y=groundY(W*.8)+(Math.random()*260-130);vx=-(120+Math.random()*240);vy=-60-Math.random()*140;}
+  else{x=30+Math.random()*(W-60);y=-40-Math.random()*220;vy=40+Math.random()*120;}
+  var rnd=Math.random()<0.35;
+  var hue=rnd?Math.floor(Math.random()*360):BALL_HUES[(Math.random()*BALL_HUES.length)|0];
+  balls.push({x:x,y:y,vx:vx,vy:vy,r:r,hue:hue,
+    sat:rnd?52+Math.random()*40:74+Math.random()*20,
+    lit:rnd?40+Math.random()*22:44+Math.random()*14,
+    rot:Math.random()*6.28,vr:(Math.random()-.5)*7,
+    age:0,melt:-1,landed:false,resting:false,settle:0,life:0,phase:Math.random()*6.28});
+}
+function spawnWater(x,y,hue,r){
+  /* v2.7: a pigment SHEET, narrow, with its own colour and its own tempo */
+  var rr=(r===undefined||r<=0)?18:r;
+  var heavy=Math.pow(Math.random(),2.2);       /* few tall peaks, many low ones */
+  var width=rr*(2.6+Math.random()*1.8)*(0.85+heavy*0.55);
+  waters.push({x:x,y:y,w:rr*0.5,h0:rr*0.34,h:rr*0.34,targetW:width,
+    hue:hue,sat:58+Math.random()*30,lit:54+Math.random()*16,
+    phase:Math.random()*6.283,phase2:Math.random()*6.283,
+    freq:0.75+Math.random()*1.15,skew:Math.random(),
+    amp:rr*(0.85+heavy*2.35),react:0.45+Math.random()*0.8,
+    speed:0.45+Math.random()*0.55,drift:(Math.random()-0.5)*7,
+    age:0,grow:0,life:0});
+}
+function spawnRipple(x,y,r0,r1,life,alpha,hue){
+  if(ripples.length>220)ripples.shift();
+  ripples.push({x:x,y:y,r0:r0,r1:r1,life:0,maxLife:life,alpha:alpha,hue:hue});
+}
+function splash(x,y,hue,r,n){
+  if(!n)n=5+((Math.random()*7)|0);
+  for(var i=0;i<n;i++){
+    var a=-Math.PI/2+(Math.random()-.5)*2.5,sp=70+Math.random()*230;
+    drops.push({x:x,y:y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
+      r:1.1+Math.random()*r*.15,hue:hue,life:0,max:.6+Math.random()*1.0});
+  }
+}
+function spawnBeatRings(strength){
+  var s=(strength===undefined)?1:strength;
+  var n=1+((Math.random()*3)|0);
+  for(var i=0;i<n;i++){
+    var x=40+Math.random()*Math.max(1,W-80);
+    var y=groundY(x);
+    var max=(170+Math.random()*170)*(0.6+0.4*s);
+    beats.push({x:x,y:y,r0:14,r1:max,life:0,maxLife:1.5+Math.random()*1.1,
+      hue:186+Math.random()*60,alpha:(.5+Math.random()*.25)*s});
+  }
+  if(beats.length>40)beats.splice(0,beats.length-40);
+}
+
+/* ============================================================
+   UPDATE
+   ============================================================ */
+function update(dt,t){
+  for(var i=balls.length-1;i>=0;i--){
+    var b=balls[i];b.age+=dt;
+    if(b.melt<0){
+      b.vy+=GRAV*dt;b.vx+=Math.sin(b.age*1.7+b.phase)*18*dt;
+      b.x+=b.vx*dt;b.y+=b.vy*dt;b.rot+=b.vr*dt;
+      if(b.x<b.r){b.x=b.r;b.vx=Math.abs(b.vx)*.72;}
+      if(b.x>W-b.r){b.x=W-b.r;b.vx=-Math.abs(b.vx)*.72;}
+      var gy=groundY(b.x);
+      if(b.y+b.r>=gy){
+        b.y=gy-b.r;
+        if(b.vy>0){
+          var im=b.vy;
+          b.vy=-b.vy*.52;b.vx*=.80;b.vr*=.70;
+          if(b.vy<50){b.vy=0;b.resting=true;}else{b.resting=false;}
+          if(!b.landed){b.landed=true;
+            if(im>260){splash(b.x,gy-2,196,b.r*.6,4);spawnRipple(b.x,gy,b.r*.5,b.r*3.2+20,.85,.35,200);}}
+        }
+        if(b.resting){b.vx*=Math.pow(.18,dt);b.vr=b.vx/b.r*0.9;b.restT=(b.restT||0)+dt;}
+        b.settle=(b.resting&&Math.abs(b.vx)<16)?b.settle+dt:0;
+        b.life+=dt;
+        if(b.settle>0.5||b.life>12){b.melt=0;spawnWater(b.x,gy,(b.hue*.35+200*.65)%360,b.r);}
+      }else{b.resting=false;b.restT=0;b.life+=dt;}
+    }else{
+      b.melt+=dt/1.1;var gy2=groundY(b.x);
+      var e=smooth(clamp(b.melt,0,1));
+      b.y=gy2-b.r*(1-0.18*e);b.rot+=b.vr*dt*0.35;
+      if(b.melt>=1){
+        var gy3=groundY(b.x);
+        splash(b.x,gy3-4,200,b.r,9);
+        spawnRipple(b.x,gy3,b.r*.6,b.r*4.2+34,2.6,.55,198);
+        spawnRipple(b.x,gy3,b.r*.3,b.r*2.4+18,1.8,.4,205);
+        balls.splice(i,1);continue;
+      }
+    }
+  }
+  for(var i2=0;i2<balls.length;i2++){
+    var a=balls[i2];if(a.melt>=0)continue;
+    for(var j=i2+1;j<balls.length;j++){
+      var b2=balls[j];if(b2.melt>=0)continue;
+      var dx=b2.x-a.x,dy=b2.y-a.y,rr=a.r+b2.r;
+      if(Math.abs(dx)>rr||Math.abs(dy)>rr)continue;
+      var d=Math.hypot(dx,dy);
+      if(d<rr&&d>0.001){
+        var nx=dx/d,ny=dy/d,ov=(rr-d)*.5;
+        a.x-=nx*ov;a.y-=ny*ov;b2.x+=nx*ov;b2.y+=ny*ov;
+        var rel=(b2.vx-a.vx)*nx+(b2.vy-a.vy)*ny;
+        if(rel<0){var imp=-rel*.5;
+          a.vx-=nx*imp;a.vy-=ny*imp;b2.vx+=nx*imp;b2.vy+=ny*imp;
+          a.vr+=(Math.random()-.5)*3;b2.vr+=(Math.random()-.5)*3;}
+      }
+    }
+  }
+  for(var mg=waters.length-1;mg>=0;mg--){
+    var wp=waters[mg];
+    wp.age+=dt;wp.life+=dt;
+    wp.grow=Math.min(1,wp.grow+dt*1.35);
+    var wg=1-Math.pow(1-wp.grow,3);
+    wp.x+=wp.drift*dt;
+    wp.w=wp.w+(wp.targetW*wg-wp.w)*Math.min(1,dt*5);
+    wp.w+=dt*1.1*S.spread;
+    wp.h=wp.h0*(0.5+0.5*wg);
+  }
+  /* v2.7: the sheets never merge - every pigment bloom keeps its own
+     silhouette.  The oldest fade out and the lake stays alive. */
+  while(waters.length>44){
+    var oldest=0;
+    for(var qi=1;qi<waters.length;qi++){ if(waters[qi].age>waters[oldest].age) oldest=qi; }
+    waters.splice(oldest,1);
+  }
+  for(var i5=drops.length-1;i5>=0;i5--){
+    var d2=drops[i5];d2.life+=dt;d2.vy+=900*dt;
+    d2.x+=d2.vx*dt;d2.y+=d2.vy*dt;
+    var gy4=groundY(d2.x);
+    if(d2.y>gy4-2){d2.y=gy4-2;d2.vy*=-.3;d2.vx*=.6;if(Math.abs(d2.vy)<25){drops.splice(i5,1);continue;}}
+    if(d2.life>d2.max)drops.splice(i5,1);
+  }
+  rainAcc+=dt;
+  var rate=Math.max(0.01,S.rain);
+  while(rainAcc>1/rate){rainAcc-=1/rate;
+    var big=Math.random()<.3;
+    var len=big?28+Math.random()*26:14+Math.random()*14;
+    rain.push({x:Math.random()*W,y:-len,vy:700+Math.random()*420,len:len,w:len*(big?.28:.34)});}
+  for(var i6=rain.length-1;i6>=0;i6--){
+    var r2=rain[i6];r2.vy+=260*dt;r2.y+=r2.vy*dt;
+    var gy5=groundY(r2.x);
+    if(r2.y+r2.len*.5>=gy5){splash(r2.x,gy5-3,200,r2.w*1.1,5);spawnRipple(r2.x,gy5,2,r2.len*2.6+18,1.9,.42,198);rain.splice(i6,1);}
+  }
+  for(var i7=ripples.length-1;i7>=0;i7--){var r3=ripples[i7];r3.life+=dt;if(r3.life>r3.maxLife)ripples.splice(i7,1);}
+  for(var i8=beats.length-1;i8>=0;i8--){var b4=beats[i8];b4.life+=dt;if(b4.life>b4.maxLife)beats.splice(i8,1);}
+}
+var rainAcc=0;
+
+/* ============================================================
+   DRAW
+   ============================================================ */
+function drawGround(t){
+  ctx.save();
+  for(var i=0;i<dabs.length;i++){
+    var d=dabs[i];var x=d.x*W,gy=groundY(x);
+    ctx.globalAlpha=.10+.05*Math.sin(t*.8+d.o);
+    ctx.fillStyle=hsla(d.h,45,60,1);
+    ctx.beginPath();ctx.ellipse(x,gy+2+Math.sin(d.o)*2,d.r,d.r*.28,0,0,6.2832);ctx.fill();}
+  ctx.restore();
+  ctx.beginPath();ctx.moveTo(0,H);
+  for(var x2=0;x2<W;x2+=8)ctx.lineTo(x2,groundY(x2));
+  ctx.lineTo(W,H);ctx.closePath();
+  var g=ctx.createLinearGradient(0,groundBase-26,0,H);
+  if(S.theme==='deep'){g.addColorStop(0,'rgba(16,42,58,0.60)');g.addColorStop(1,'rgba(4,10,20,0.92)');}
+  else{g.addColorStop(0,'rgba(130,150,125,0.38)');g.addColorStop(1,'rgba(70,92,80,0.55)');}
+  ctx.fillStyle=g;ctx.fill();
+  ctx.beginPath();
+  for(var x3=0;x3<W;x3+=6){var y3=groundY(x3);if(x3===0)ctx.moveTo(x3,y3);else ctx.lineTo(x3,y3);}
+  ctx.strokeStyle=S.theme==='deep'?'rgba(175,230,255,0.38)':'rgba(40,70,60,0.38)';
+  ctx.lineWidth=1.6;ctx.stroke();
+}
+
+/* ============================================================
+   v2.7 WAVE ENGINE - painterly watercolor sheets
+   ============================================================ */
+var WGAIN=0.65;   /* live knob: type WAVE_GAIN=1 in the console */
+
+function sheetAmp(p){
+  var stat=p.amp*S.waveAmp*S.boost*(0.45+0.55*p.grow);
+  var mus=S.audioPx*p.react*0.55*WGAIN;
+  return stat*0.55+mus;
+}
+function waveY(p,u,t){
+  /* asymmetric bell: soft shoulders, one dominant shoulder */
+  var c=(p.skew>0.5)?0.44:0.56;
+  var e=(u<c)?Math.pow(u/c,1.30):Math.pow((1-u)/(1-c),1.85);
+  e=e*e*(3-2*e);
+  /* three octaves on irrational ratios - the crest never repeats */
+  var sp=t*p.speed*S.waveSpeed;
+  var s1=Math.sin(u*6.2832*p.freq+sp+p.phase);
+  var s2=Math.sin(u*6.2832*p.freq*2.618+sp*0.72+p.phase2);
+  var s3=Math.sin(u*6.2832*p.freq*6.13-sp*1.27+p.phase*0.61);
+  var shape=0.30+0.70*(s1*0.60+s2*0.27+s3*0.13);
+  if(S.softCrests) shape=0.74*shape+0.26*(0.5+0.5*Math.sin(u*6.2832*p.freq*0.5+sp*0.4+p.phase));
+  var a=sheetAmp(p)*e*(1+AU.beat*0.16*p.react);
+  return p.y-a*shape;
+}
+function drawLakeBase(t){
+  /* the whole body of water: one slow swell, translucent, with a lit surface */
+  var N=60;
+  ctx.save();
+  ctx.beginPath();ctx.moveTo(0,H);
+  for(var i=0;i<=N;i++){
+    var u=i/N,x=u*W;
+    var y=groundY(x)-6-Math.sin(u*6.2832*1.6+t*0.18)*6-Math.sin(u*6.2832*3.7-t*0.11)*3;
+    if(i===0)ctx.lineTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.lineTo(W,H);ctx.closePath();
+  var g=ctx.createLinearGradient(0,groundBase-40,0,H);
+  g.addColorStop(0,'rgba(120,220,235,0.20)');
+  g.addColorStop(0.18,'rgba(60,150,190,0.16)');
+  g.addColorStop(0.60,'rgba(30,70,120,0.22)');
+  g.addColorStop(1,'rgba(8,18,42,0.45)');
+  ctx.fillStyle=g;ctx.fill();
+  ctx.globalCompositeOperation='lighter';
+  ctx.strokeStyle='rgba(160,235,255,0.16)';ctx.lineWidth=1.2;
+  ctx.beginPath();
+  for(var j=0;j<=N;j++){
+    var u2=j/N,x2=u2*W;
+    var y2=groundY(x2)-6-Math.sin(u2*6.2832*1.6+t*0.18)*6-Math.sin(u2*6.2832*3.7-t*0.11)*3;
+    if(j===0)ctx.moveTo(x2,y2);else ctx.lineTo(x2,y2);
+  }
+  ctx.stroke();ctx.restore();
+}
+function drawWater(p,t){
+  var N=44,hw=p.w/2,x0=p.x-hw;
+  WGAIN=(typeof window.WAVE_GAIN==='number')?window.WAVE_GAIN:0.65;
+  var fade=Math.max(0,Math.min(1,(48-p.age)/28));
+  if(fade<=0)return;
+  var hu=((p.hue+AU.beat*16+AU.level*6)%360+360)%360;
+  var sat=Math.max(34,Math.min(86,p.sat));
+  var lit=Math.max(40,Math.min(78,p.lit));
+  var deep=p.y+Math.max(10,p.h*2.4);
+  var amp=sheetAmp(p);
+  /* 1 - reflection: the crest mirrored into the water */
+  if(p.amp>26){
+    ctx.save();ctx.globalAlpha=0.16*fade;
+    ctx.beginPath();
+    for(var i=0;i<=N;i++){
+      var u=i/N,x=x0+u*p.w,y=waveY(p,u,t);
+      var ry=p.y+(p.y-y)*0.55+3;
+      if(i===0)ctx.moveTo(x,ry);else ctx.lineTo(x,ry);
+    }
+    ctx.lineTo(p.x+hw,deep);ctx.lineTo(x0,deep);ctx.closePath();
+    var rg=ctx.createLinearGradient(0,p.y,0,deep);
+    rg.addColorStop(0,hsla(hu,70,50,0.55));
+    rg.addColorStop(1,hsla(hu+12,60,30,0));
+    ctx.fillStyle=rg;ctx.fill();ctx.restore();
+  }
+  /* 2 - bloom: the pigment bleeding into the paper */
+  ctx.save();ctx.globalAlpha=0.10*fade;
+  ctx.beginPath();
+  for(var i2=0;i2<=N;i2++){
+    var u2=i2/N,x2=x0+u2*p.w,y2=waveY(p,u2,t)-p.h*0.22;
+    if(i2===0)ctx.moveTo(x2,y2);else ctx.lineTo(x2,y2);
+  }
+  ctx.lineTo(p.x+hw,p.y);ctx.lineTo(x0,p.y);ctx.closePath();
+  ctx.fillStyle=hsla(hu+26,80,70,1);ctx.fill();ctx.restore();
+  /* 3 - body: translucent pigment */
+  ctx.save();
+  ctx.beginPath();
+  for(var i3=0;i3<=N;i3++){
+    var u3=i3/N,x3=x0+u3*p.w,y3=waveY(p,u3,t);
+    if(i3===0)ctx.moveTo(x3,y3);else ctx.lineTo(x3,y3);
+  }
+  ctx.lineTo(p.x+hw,deep);ctx.lineTo(x0,deep);ctx.closePath();
+  var bg=ctx.createLinearGradient(0,p.y-amp,0,deep);
+  bg.addColorStop(0,hsla(hu,sat,lit,0.80*fade));
+  bg.addColorStop(0.45,hsla(hu+10,sat-6,lit-10,0.66*fade));
+  bg.addColorStop(1,hsla(hu+20,sat-12,lit-22,0.34*fade));
+  ctx.fillStyle=bg;ctx.fill();ctx.restore();
+  /* 4 - wet edge: light catching the crest */
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  ctx.strokeStyle=hsla(hu+6,92,88,0.42*fade);
+  ctx.lineWidth=Math.max(1,Math.min(3.2,amp*0.018+0.8));
+  ctx.lineJoin='round';
+  ctx.beginPath();
+  for(var i4=0;i4<=N;i4++){
+    var u4=i4/N,x4=x0+u4*p.w,y4=waveY(p,u4,t);
+    if(i4===0)ctx.moveTo(x4,y4);else ctx.lineTo(x4,y4);
+  }
+  ctx.stroke();ctx.restore();
+  /* 5 - sparkle on the highest points */
+  if(amp>44){
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.strokeStyle=hsla(hu+4,96,92,0.5*fade);
+    ctx.lineWidth=Math.max(0.9,amp*0.010);
+    ctx.beginPath();var pen=false;
+    for(var i5=0;i5<=N;i5++){
+      var u5=i5/N,x5=x0+u5*p.w,y5=waveY(p,u5,t);
+      var rel=(p.y-y5)/Math.max(1,amp);
+      if(rel>0.72){ if(!pen){ctx.moveTo(x5,y5);pen=true;} else ctx.lineTo(x5,y5); }
+      else pen=false;
+    }
+    ctx.stroke();ctx.restore();
+  }
+  /* 6 - pigment rim: paint pooled at the bottom edge */
+  ctx.save();ctx.globalAlpha=0.18*fade;
+  ctx.strokeStyle=hsla(hu+16,72,38,1);ctx.lineWidth=1.1;
+  ctx.beginPath();ctx.moveTo(x0,deep);ctx.lineTo(p.x+hw,deep);ctx.stroke();ctx.restore();
+}
+function drawRipples(){
+  ctx.save();
+  for(var i=0;i<ripples.length;i++){
+    var r=ripples[i];
+    var k=r.life/r.maxLife,e=1-Math.pow(1-k,2.4);
+    var rr=r.r0+(r.r1-r.r0)*e;
+    ctx.globalAlpha=r.alpha*(1-k)*(1-k)*.9;
+    ctx.strokeStyle=hsla(r.hue,92,84,1);
+    ctx.lineWidth=Math.max(.7,2.6*(1-k)+.3);
+    ctx.beginPath();ctx.ellipse(r.x,r.y,rr,rr*.30,0,0,6.2832);ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawBeats(){
+  if(!beats.length)return;
+  ctx.save();ctx.globalCompositeOperation='lighter';
+  for(var i=0;i<beats.length;i++){
+    var b=beats[i];
+    var k=b.life/b.maxLife;
+    var e=1-Math.pow(1-k,2.2);
+    var rr=b.r0+(b.r1-b.r0)*e;
+    var fade=(1-k)*(1-k);
+    ctx.globalAlpha=b.alpha*fade;
+    ctx.strokeStyle=hsla(b.hue,95,82,1);
+    ctx.lineWidth=Math.max(1,4.5*(1-k)+0.8);
+    ctx.beginPath();ctx.ellipse(b.x,b.y,rr,rr*.17,0,0,6.2832);ctx.stroke();
+    ctx.globalAlpha=b.alpha*fade*0.45;
+    ctx.beginPath();ctx.ellipse(b.x,b.y,rr*0.68,rr*.115,0,0,6.2832);ctx.stroke();
+  }
+  ctx.restore();
+}
+function drawRain(){
+  ctx.save();
+  for(var i=0;i<rain.length;i++){
+    var r=rain[i];
+    /* solid trail instead of a per-drop gradient: at 24 drops/sec the
+       gradient objects were a measurable per-frame cost */
+    ctx.globalAlpha=.13;
+    ctx.strokeStyle='rgba(200,238,255,1)';ctx.lineWidth=r.w*.42;
+    ctx.beginPath();ctx.moveTo(r.x,r.y-r.len*3.4);ctx.lineTo(r.x,r.y-r.len*.4);ctx.stroke();
+    ctx.globalAlpha=.92;
+    var g=ctx.createLinearGradient(r.x,r.y-r.len*.5,r.x,r.y+r.len*.5);
+    g.addColorStop(0,'rgba(170,215,255,0.20)');g.addColorStop(.5,'rgba(195,232,255,0.62)');
+    g.addColorStop(1,'rgba(235,252,255,0.92)');ctx.fillStyle=g;
+    var h=r.len,w=r.w;
+    ctx.beginPath();
+    ctx.moveTo(r.x,r.y-h*.5);
+    ctx.quadraticCurveTo(r.x+w*.55,r.y+r.len*.05,r.x+w*.36,r.y+r.len*.42);
+    ctx.quadraticCurveTo(r.x-w*.36,r.y+r.len*.42,r.x-w*.55,r.y+r.len*.05);
+    ctx.quadraticCurveTo(r.x-w*.36,r.y+r.len*.42,r.x-w*.36,r.y+r.len*.42);
+    ctx.closePath();ctx.fill();
+    ctx.globalAlpha=.65;ctx.fillStyle='rgba(255,255,255,0.85)';
+    ctx.beginPath();ctx.ellipse(r.x-w*.16,r.y+h*.16,w*.11,h*.20,0,0,6.2832);ctx.fill();
+  }
+  ctx.restore();
+}
+function drawDrops(){
+  ctx.save();
+  for(var i=0;i<drops.length;i++){
+    var d=drops[i];var k=1-d.life/d.max;
+    ctx.globalAlpha=Math.max(0,k)*.95;
+    ctx.fillStyle=hsla(d.hue,85,70,0.92);
+    ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,6.2832);ctx.fill();}
+  ctx.restore();
+}
+function drawBall(b){
+  var spr=ballSprite(b.hue,b.sat,b.lit,b.r);
+  var appear=Math.min(1,b.age/.3);
+  var sc=appear<1?.22+.78*(1-Math.pow(1-appear,3)):1;
+  var gy=groundY(b.x);
+  var fall=clamp(1-(gy-(b.y+b.r))/(H*.65),0,1);
+  ctx.save();ctx.globalAlpha=.30*fall*appear;ctx.fillStyle='#000';
+  ctx.beginPath();ctx.ellipse(b.x,gy+3,b.r*(.55+.45*fall),b.r*.22*fall,0,0,6.2832);ctx.fill();ctx.restore();
+  var m=b.melt>=0?b.melt:0;
+  var e=smooth(clamp(m,0,1));
+  ctx.save();
+  ctx.translate(b.x,b.y);ctx.rotate(b.rot);
+  ctx.scale(sc*(1+.26*e),sc*(1-.26*e));
+  ctx.globalAlpha=Math.min(1,appear)*(1-e);
+  if(HAS_FILTER&&m>.02)ctx.filter='blur('+(m*8).toFixed(2)+'px)';
+  ctx.drawImage(spr.canvas,-spr.size/2,-spr.size/2);
+  if(HAS_FILTER)ctx.filter='none';
+  ctx.restore();
+  if(b.age<.75){
+    ctx.save();ctx.globalCompositeOperation='lighter';
+    ctx.globalAlpha=(1-b.age/.75)*.42;
+    var g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r*2.8);
+    g.addColorStop(0,hsla(b.hue,95,80,0.9));g.addColorStop(1,'hsla(0,0%,100%,0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(b.x,b.y,b.r*2.8,0,6.2832);ctx.fill();ctx.restore();
+  }
+}
+
+/* ============================================================
+   DIAGNOSTICS
+   ============================================================ */
+function panelSections(){
+  var out=[],hs=document.querySelectorAll('.panel h2');
+  for(var i=0;i<hs.length;i++) out.push(hs[i].textContent.trim());
+  return out;
+}
+function diagReport(){
+  var ctxState=AU.ctx?AU.ctx.state:'none';
+  var tracks=AU.stream?AU.stream.getAudioTracks().filter(function(t){return t.readyState==='live';}).length:0;
+  var secs=panelSections();
+  var missing=EXPECTED_SECTIONS.filter(function(s){return secs.indexOf(s)<0;});
+  var sr=AU.ctx?AU.ctx.sampleRate:48000;
+  var lastErr=(window.__wbrLastError?window.__wbrLastError():'')||'(none)';
+  return [
+    BUILD.name+' - build v'+BUILD.version,
+    'page: '+(location.protocol==='file:'?'local HTML file':location.origin),
+    'browser: '+browserName(),
+    'viewport: '+W+'x'+H+'  dpr:'+DPR,
+    'display: '+S.fpsMode.toUpperCase()+'  target '+(S.fpsTarget?S.fpsTarget+' fps':'max')+'  audio sampling up to 60 Hz (callback-limited)',
+    'sections: '+(secs.length?secs.join(', '):'(none)')+(missing.length?'  MISSING: '+missing.join(', '):'  OK complete'),
+    'controls: '+wiredCount+' wired'+(missingIds.length?('  MISSING: '+missingIds.join(', ')):'  OK all present'),
+    'audio: ctx='+ctxState+' src='+str(AU.mode)+' tracks='+tracks
+      +' thread='+(AU.threadAlive?'alive':'STALLED')+' sr='+sr,
+    'delivery: cumulative silence='+num(AU.gapPct,1)+'% events='+num(AU.gaps,0)
+      +' sustain='+num(S.gapHold,2)+'s  hold='+(S.gapHold>0?'on':'off'),
+    'gate: floor='+num(AU.floor,5)+' avg='+num(AU.avg,5)+' silentIf< '+num(AU.gate,5),
+    'process: analysers=1 snapshots/s='+(AU.analyser?(AU.analysisRateReady?num(AU.analysisRate,1)+' measured':'measuring'):'off')
+      +' ring='+num(AU.ringLen/sr*1000,0)+'ms'
+      +' fill='+num(AU.ringFill/AU.ringLen*100,0)+'% fast='+num(FAST_LEN/sr*1000,0)+'ms'
+      +' adv='+num(AU.adv,0)+' rawMs='+num(AU.rawMs,1)+' dropped='+num(AU.dropped,0),
+    'levels: rms='+num(AU.rms,4)+' (fast '+num(AU.rmsFast,4)+' / long '+num(AU.rmsLong,4)+')'
+      +' norm='+num(AU.norm,2)+' level='+num(AU.level,3)+' amp='+num(S.audioPx,0)+'px',
+    'signal: peak='+num(AU.peak,5)+' ref='+num(AU.ref,5)
+      +(AU.peak>0&&AU.peak<0.004?'   VERY QUIET SOURCE':''),
+    'bands: bass='+num(AU.bass,3)+' mid='+num(AU.mid,3)+' high='+num(AU.high,3)
+      +' beat='+num(AU.beat,2)+' rings='+num(beats.length,0),
+    'flux(dB): bass='+num(AU.bassFlux,2)+' med='+num(AU.medB,2)+' ratio='+num(AU.ratioB,2)
+      +' (thr '+num(AU.thrB,2)+')  | mid='+num(AU.midFlux,2)+' med='+num(AU.medM,2)
+      +' ratio='+num(AU.ratioM,2)+' (thr '+num(AU.thrM,2)+')  sens='+num(AU.beatSens,2),
+    'lake: sheets='+num(waters.length,0)+'  waveGain='+num(WGAIN,2),
+    'lastError: '+String(lastErr).split('\n')[0]
+  ].join('\n');
+}
+function refreshDiag(){
+  try{
+    var d=el('aDiag');
+    if(d) d.textContent=diagReport();
+  }catch(e){
+    var d2=el('aDiag');
+    if(d2) d2.textContent='diagnostics unavailable: '+(e&&e.message||e);
+  }
+}
+function applyBuildStamp(){
+  var label='v'+BUILD.version;
+  setTxt('verStamp','build '+label);
+  setTxt('verHud','build '+label);
+  document.title='Watercolor Bingo Rain '+label;
+}
+
+/* ============================================================
+   LOOP
+   ============================================================ */
+var last=performance.now(),t=0,fps=60,fpsElapsed=0,renderedFrames=0;
+var burstAcc=0,burstIndex=0,frames=0,diagAcc=0,statusAcc=0,procAcc=0,errCount=0;
+var audioPhase=0,audioElapsed=0,renderAcc=0,pending=0;
+
+function doBurst(n){ for(var i=0;i<n;i++)spawnBall(); }
+function clearScene(){
+  waters.length=0; balls.length=0; drops.length=0;
+  ripples.length=0; beats.length=0; rain.length=0;
+}
+function resetFrameClocks(){
+  last=performance.now();
+  pending=0; audioPhase=0; audioElapsed=0; renderAcc=0;
+  fpsElapsed=0; renderedFrames=0;
+}
+
+function frame(now){
+  try{
+    var raw=(now-last)/1000;last=now;          /* wall time since the previous callback */
+    if(!isFin(raw)||raw<0)raw=0;
+    AU.rawMs=raw*1000;
+    var dt=raw+pending;pending=0;              /* simulation time since the previous rendered frame */
+    if(dt>.05)dt=.05;                          /* existing simulation safety clamp */
+    fpsElapsed+=raw;                            /* includes skipped draw callbacks */
+
+    /* AUDIO SNAPSHOTS: schedule from real callback time, never from dt+pending.
+       At most one fresh analyser read is made per callback. If callbacks are
+       late, pass the full elapsed interval to the time-based filters instead
+       of replaying the same analyser snapshot several times. The audio rate is
+       therefore best-effort, up to 60 Hz, and limited by callback availability. */
+    var aStep=1/60;
+    audioPhase+=raw;
+    audioElapsed+=raw;
+    if(audioPhase>=aStep){
+      audioPhase=audioPhase%aStep;
+      var sampleProcessed=sampleAudio(audioElapsed);
+      /* Keep elapsed time until a fresh AudioContext snapshot is processed.
+         When capture is inactive or suspended, restart the interval instead
+         of carrying the suspension duration into the next live sample. */
+      if(sampleProcessed||!AU.active||!AU.analyser||!AU.ctx||AU.ctx.state!=='running'){
+        audioElapsed=0;
+      }
+    }
+    S.audioPx=(AU.level+AU.beat*0.16)*(H*0.5)*S.audioHeight;
+
+    /* DISPLAY THROTTLE - 30 / 60 / max */
+    if(S.fpsTarget>0){
+      renderAcc+=raw;
+      if(renderAcc < 1/S.fpsTarget-0.0008){
+        pending=dt;
+        requestAnimationFrame(frame);return;
+      }
+      renderAcc-=1/S.fpsTarget;
+      if(renderAcc<0)renderAcc=0;
+    }
+
+    if(!S.paused){
+      t+=dt;
+      var gap=lerp(S.gapMin,S.gapMax,Math.random());
+      burstAcc+=dt;
+      if(burstAcc>=gap){burstAcc=0;
+        var n=S.ballsPerBurst;
+        if(S.alternate)n=(burstIndex++%2===0)?30:50;
+        doBurst(n);}
+      update(dt,t);
+    }
+
+    ctx.clearRect(0,0,W,H);
+    drawBg(t);
+    /* ONE low-quality blit. The source is a 5.5% buffer, so two
+       high-quality resamples of a 1.5M-pixel destination per frame
+       was the single biggest frame-time cost. */
+    ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='low';
+    ctx.drawImage(bgC,0,0,W,H);
+
+    drawGround(t);
+    drawLakeBase(t);
+    for(var i=0;i<waters.length;i++) drawWater(waters[i],t);
+    drawRipples();
+    drawBeats();
+    drawRain();
+    for(var j=0;j<balls.length;j++) drawBall(balls[j]);
+    drawDrops();
+    drawGrain();
+    drawVignette();
+
+    frames++;
+    renderedFrames++;
+    if(fpsElapsed>=0.5){
+      fps=renderedFrames/fpsElapsed;
+      renderedFrames=0;
+      fpsElapsed=0;
+    }
+    var badgeEl=el('badge');
+    if(frames===2&&badgeEl) badgeEl.classList.add('ok');
+    var blabel='running - '+W+'x'+H;
+    if(badgeEl&&badgeEl.textContent!==blabel) badgeEl.textContent=blabel;
+    setTxt('sFps',fps.toFixed(0)+' fps');
+    setTxt('sCount',balls.length+' balls - '+waters.length+' sheets');
+    setTxt('sRain',(ripples.length+beats.length)+' ripples');
+
+    var fill=el('mFill');
+    if(fill) fill.style.width=(AU.level*100).toFixed(1)+'%';
+    setTxt('vAudio',AU.active?(AU.level*100).toFixed(0)+'%':'-');
+
+    statusAcc+=dt;
+    if(statusAcc>0.5){statusAcc=0;
+      var ss=el('srcState');
+      if(ss){
+        if(AU.active){
+          ss.textContent='source: '+AU.mode+' - gap '+num(AU.gapPct,0)+'% - level '
+            +(AU.level*100).toFixed(0)+'% - amp '+num(S.audioPx,0)+'px'
+            +(AU.beat>0.25?' - BEAT':'')+(AU.gapFrames>0?' - GAP':'');
+          ss.className='srcstate'+(AU.gapFrames>0?' warn':'');
+        }else{ss.textContent='source: off';ss.className='srcstate';}
+      }
+      if(AU.active&&!AU.threadAlive){
+        showAlert('<b>The audio engine froze.</b><br>Click the blue reconnect button at the top of the screen.');
+      }else showAlert(null);
+      if(AU.active&&AU.mode==='mic'){
+        setAudioStatus('microphone live','ok');
+        showTip('If it stutters on the mic: Windows > Settings > System > Sound > Communications > "Do nothing".');
+      }else if(AU.active){
+        setAudioStatus(modeLabel(AU.mode)+' live','ok');
+        if(AU.peak>0 && AU.peak<0.004){
+          showTip('The captured audio is very quiet (peak '+num(AU.peak,5)+'). '+
+                  'Raise the system volume, or capture a different source. '+
+                  'The detector is level-independent, but it needs some signal.');
+        }else showTip(null);
+      }
+    }
+
+    procAcc+=dt;
+    if(procAcc>0.4){procAcc=0;refreshProc();}
+    diagAcc+=dt;
+    if(diagAcc>0.5){diagAcc=0;refreshDiag();}
+  }catch(err){
+    errCount++;
+    if(errCount===1){
+      var box=el('err');
+      if(box){
+        box.style.display='block';
+        box.textContent='! Runtime error in the render loop\n'+(err&&err.message||err)
+          +'\n'+(err&&err.stack?String(err.stack).split('\n').slice(0,3).join('\n'):'')
+          +'\n\n(click to copy) - the artwork keeps running.';
+      }
+    }
+    if(console.error)console.error(err);
+  }
+  requestAnimationFrame(frame);
+}
+
+function refreshProc(){
+  try{
+    var e=el('pDiag');
+    if(!e)return;
+    var sr=AU.ctx?AU.ctx.sampleRate:48000;
+    var rateText=AU.analyser?(AU.analysisRateReady?num(AU.analysisRate,1)+' snapshots/s (measured)':'measuring'):'off';
+    e.textContent=[
+      'analysers: 1',
+      'sampling: '+rateText+'  (up to 60 Hz; animation-callback limited)',
+      'buffers: time '+FFT_SIZE+' samples / frequency '+(FFT_SIZE/2)+' bins',
+      'long RMS window: '+num(AU.ringLen/sr*1000,0)+' ms   fill '+num(AU.ringFill/AU.ringLen*100,0)+'%',
+      'fast window: '+num(FAST_LEN/sr*1000,0)+' ms',
+      'rms fast '+num(AU.rmsFast,4)+'   long '+num(AU.rmsLong,4)+'   used '+num(AU.rms,4),
+      'cumulative silence '+num(AU.gapPct,1)+'% ('+num(AU.gaps,0)+' ev)  sustain '+num(S.gapHold,2)+' s',
+      'gate floor '+num(AU.floor,5)+'  avg '+num(AU.avg,5)+'  silentIf< '+num(AU.gate,5),
+      'callback '+num(AU.rawMs,1)+' ms  ~'+num(1000/Math.max(1,AU.rawMs),0)+' callbacks/s'
+        +'  dropped samples '+num(AU.dropped,0),
+      'display: '+S.fpsMode.toUpperCase()+'  sheets '+num(waters.length,0)
+    ].join('\n');
+    setTxt('vLoad',rateText);
+  }catch(e){}
+}
+
+/* ============================================================
+   UI
+   ============================================================ */
+function syncUI(){
+  S.ballsPerBurst=parseInt(el('rBalls').value,10);
+  S.gapMin=parseFloat(el('rGapMin').value);S.gapMax=parseFloat(el('rGapMax').value);
+  if(S.gapMax<S.gapMin){S.gapMax=S.gapMin;el('rGapMax').value=S.gapMax;}
+  S.waveSpeed=parseFloat(el('rWaveSpeed').value);S.waveAmp=parseFloat(el('rWave').value);
+  S.spread=parseFloat(el('rSpread').value);S.rain=parseFloat(el('rRain').value);
+  S.sensitivity=parseFloat(el('rSens').value);S.release=parseFloat(el('rSmooth').value);
+  S.audioHeight=parseFloat(el('rAudioH').value);S.beatSens=parseFloat(el('rBeatSens').value);
+  S.ringMs=parseInt(el('rRing').value,10);S.gapHold=parseFloat(el('rGapHold').value);
+  S.boost=S.extraTall?2.2:1;
+  setRingLen(S.ringMs);
+  setTxt('vBalls',S.alternate?'30 / 50 alt':S.ballsPerBurst);
+  setTxt('vGapMin',num(S.gapMin,1)+' s');
+  setTxt('vGapMax',num(S.gapMax,1)+' s');
+  setTxt('vWaveSpeed',num(S.waveSpeed,2)+'x');
+  setTxt('vWave',num(S.waveAmp*S.boost,2)+'x'+(S.extraTall?' +':''));
+  setTxt('vSpread',num(S.spread,2)+'x');
+  setTxt('vRain',num(S.rain,1));
+  setTxt('vSens',num(S.sensitivity,2)+'x');
+  setTxt('vSmooth',num(S.release,2)+' s');
+  setTxt('vAudioH',num(S.audioHeight*100,0)+'%');
+  setTxt('vBeatSens',num(S.beatSens,2)+'x');
+  setTxt('vRing',num(S.ringMs,0)+' ms');
+  setTxt('vGapHold',num(S.gapHold,2)+' s');
+}
+function setFpsMode(mode,target){
+  S.fpsMode=mode;S.fpsTarget=target;
+  var b30=el('bFps30'),b60=el('bFps60'),bMax=el('bFpsMax');
+  if(b30)b30.classList.toggle('on',mode==='30');
+  if(b60)b60.classList.toggle('on',mode==='60');
+  if(bMax)bMax.classList.toggle('on',mode==='max');
+  var lbl=el('fpsLabel');
+  if(lbl) lbl.textContent='Display target: '+mode.toUpperCase()+' \u00b7 audio sampling: up to 60 Hz';
+}
+function setPause(p){
+  S.paused=p;
+  var b=el('bPause');
+  if(b){b.textContent=p?'Resume':'Pause';b.classList.toggle('on',p);}
+}
+function togglePanel(){S.uiHidden=!S.uiHidden;document.body.classList.toggle('hideui',S.uiHidden);}
+function toggleFullscreen(){
+  if(!document.fullscreenElement){
+    if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen().catch(function(){});
+  }else if(document.exitFullscreen){document.exitFullscreen().catch(function(){});}
+}
+function handleAudioToggle(on){
+  if(on){
+    var p=(AU.mode==='mic')?captureMic():captureSystem();
+    p.then(function(res){ if(!res){var c=el('cAudio');if(c)c.checked=false;} });
+  }else{
+    stopAudio();setAudioStatus('sound input off','off');showTip(null);showAlert(null);
+  }
+}
+
+canvas.addEventListener('pointermove',function(e){pointer.x=e.clientX;pointer.y=e.clientY;pointer.on=true;});
+canvas.addEventListener('pointerleave',function(){pointer.on=false;});
+canvas.addEventListener('pointerdown',function(e){
+  spawnBall(e.clientX<40?0.2:(e.clientX>W-40?0.8:undefined));});
+
+window.addEventListener('keydown',function(e){
+  var k=(e.key||'').toLowerCase();
+  if(k==='f'){e.preventDefault();toggleFullscreen();}
+  else if(k==='i'){e.preventDefault();togglePanel();}
+  else if(k==='p'){setPause(!S.paused);}
+  else if(e.code==='Space'){e.preventDefault();doBurst(S.alternate?30:S.ballsPerBurst);}
+  else if(k==='r'){clearScene();}
+  else if(AU.ctx&&AU.ctx.state==='suspended'){AU.ctx.resume().catch(function(){});}
+});
+
+document.addEventListener('fullscreenchange',function(){setTimeout(rearmAudio,80);setTimeout(rearmAudio,400);});
+document.addEventListener('webkitfullscreenchange',function(){setTimeout(rearmAudio,80);setTimeout(rearmAudio,400);});
+document.addEventListener('visibilitychange',function(){if(!document.hidden){resetFrameClocks();setTimeout(rearmAudio,150);}});
+window.addEventListener('focus',function(){setTimeout(rearmAudio,150);});
+window.addEventListener('pointerdown',function(){
+  if(AU.ctx&&AU.ctx.state==='suspended')AU.ctx.resume().then(function(){
+    showRestorePill(false);setAudioStatus(modeLabel(AU.mode)+' live','ok');
+  }).catch(function(){});},{capture:true});
+
+/* ============================================================
+   BOOT - the artwork starts before anything else, so a broken
+   control can never stop the animation.
+   ============================================================ */
+try{
+  syncUI();
+  setFpsMode('60',60);
+  resize();initDabs();applyBuildStamp();refreshDiag();refreshProc();
+  for(var i=0;i<8;i++)spawnBall();
+  requestAnimationFrame(frame);
+}catch(err){
+  var box=el('err');
+  if(box){ box.style.display='block'; box.textContent='! Boot error\n'+(err&&err.message||err); }
+  if(console.error)console.error(err);
+}
+
+/* ============================================================
+   WIRE THE CONTROLS
+   Wrapped in try/catch: a typo here can never kill the artwork.
+   ============================================================ */
+try{
+  on('bPause','click',function(){setPause(!S.paused);});
+  on('bBurst','click',function(){doBurst(S.alternate?30:S.ballsPerBurst);});
+  on('bClear','click',function(){clearScene();});
+  on('bShow','click',function(){togglePanel();});
+  on('bDiag','click',function(){
+    var txt=diagReport();refreshDiag();
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(txt).then(function(){setAudioStatus('diagnostics copied to clipboard','ok');})
+        .catch(function(){setAudioStatus('copy blocked - select the text below instead','warn');});
+    }else{setAudioStatus('copy blocked - select the text below instead','warn');}
+  });
+  on('bSystem','click',function(){
+    AU.mode='system';
+    captureSystem().then(function(ok){
+      if(ok){var c=el('cAudio');if(c)c.checked=true;setAudioStatus('system audio live','ok');}
+      else{
+        showAlert('<b>Pick "Entire Screen" and tick "Share audio".</b><br>'+
+          'That captures<b>every sound your computer is making</b> - all tabs, videos, music, games.<br>'+
+          'Pick a <b>Window</b> for one app, or <b>Tab</b> for one page.');
+      }
+    });
+  });
+  on('bMic','click',function(){
+    AU.mode='mic';
+    captureMic().then(function(ok){
+      if(ok){var c=el('cAudio');if(c)c.checked=true;setAudioStatus('microphone live','ok');}
+    });
+  });
+  on('bRestore','click',function(){
+    var mode=AU.mode==='mic'?'mic':'system';
+    showRestorePill(false);
+    var p=(mode==='mic')?captureMic():captureSystem();
+    p.then(function(res){ if(!res)showRestorePill(true); else setAudioStatus(modeLabel(mode)+' live','ok'); });
+  });
+  on('cAudio','change',function(e){handleAudioToggle(e.target.checked);});
+  on('cAlt','change',function(e){S.alternate=e.target.checked;syncUI();});
+  on('cFlow','change',function(e){S.bgFlow=e.target.checked;});
+  on('cCursor','change',function(e){S.cursorPaint=e.target.checked;});
+  on('cPaper','change',function(e){S.theme=e.target.checked?'paper':'deep';buildVignette();});
+  on('cTall','change',function(e){S.extraTall=e.target.checked;syncUI();});
+  on('cSoft','change',function(e){S.softCrests=e.target.checked;});
+  on('cBeats','change',function(e){S.beats=e.target.checked;});
+  on('cGapFill','change',function(e){S.gapFill=e.target.checked;});
+  on('bFps30','click',function(){setFpsMode('30',30);});
+  on('bFps60','click',function(){setFpsMode('60',60);});
+  on('bFpsMax','click',function(){setFpsMode('max',0);});
+  onEach(['rBalls','rGapMin','rGapMax','rWaveSpeed','rWave','rSpread','rRain',
+          'rSens','rSmooth','rAudioH','rBeatSens','rRing','rGapHold'],'input',function(){syncUI();});
+}catch(err){
+  if(typeof console!=='undefined'&&console.warn)console.warn('[WBR] control wiring problem:',err);
+}
+
+refreshDiag();
+if(typeof console!=='undefined'&&console.log){
+  console.log('[WBR] build v'+BUILD.version+' ready | controls wired: '+wiredCount+
+    (missingIds.length?(' MISSING: '+missingIds.join(', ')):'  OK all present'));
+}
+
+})();
+</script>
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
